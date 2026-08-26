@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import "~/app/globals.css";
 import { ThemeToggle } from "~/components/theme-toggle";
@@ -18,6 +19,12 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
       />
     </head>
     <body className="min-h-dvh font-sans antialiased">
+      <Link
+        href="/history"
+        className="fixed top-4 right-36 z-40 rounded-full border border-rule bg-card/90 px-3 py-1.5 text-xs font-medium text-ink shadow-sm backdrop-blur transition hover:border-accent"
+      >
+        Past calls
+      </Link>
       <ThemeToggle />
       {children}
     </body>

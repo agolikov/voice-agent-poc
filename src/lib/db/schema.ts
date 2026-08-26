@@ -95,7 +95,35 @@ export const attempt = sqliteTable(
   (table) => [index("attempt_session_id_idx").on(table.sessionId)],
 );
 
+/**
+ * A durable, ordered copy of every line heard during a practice call.
+ *
+ * The post-call webhook is useful enrichment, but it can be delayed or absent
+ * in local development. Messages are therefore written live as the SDK emits
+ * them. Agent/model timing fields are nullable because ElevenLabs only reports
+ * model-only timing after a completed turn has been processed.
+ */
+export const message = sqliteTable(
+  "message",
+  {
+    id: text().primaryKey(),
+    sessionId: text().notNull(),
+    eventId: integer(),
+    role: text({ enum: ["agent", "learner"] }).notNull(),
+    body: text().notNull(),
+    recommendedTerms: text({ mode: "json" }).$type<string[]>().notNull().default([]),
+    /** Learner transcript received → agent response received, in milliseconds. */
+    agentResponseMs: integer(),
+    /** ElevenLabs' completed-turn LLM TTFB, in milliseconds. */
+    modelResponseMs: integer(),
+    modelName: text(),
+    ...timestamps,
+  },
+  (table) => [index("message_session_id_idx").on(table.sessionId)],
+);
+
 export type SelectScenario = typeof scenario.$inferSelect;
 export type SelectSession = typeof session.$inferSelect;
 export type SelectAttempt = typeof attempt.$inferSelect;
 export type SelectTemplate = typeof template.$inferSelect;
+export type SelectMessage = typeof message.$inferSelect;

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 
 import { db, schema } from "~/lib/db/client";
 import { realizationKey } from "~/lib/scenario/generate";
@@ -12,6 +12,8 @@ import {
 } from "~/lib/scenario/schema";
 import { sessionSettingsSchema, type SessionSettings } from "~/lib/session/settings";
 import { similarity } from "~/lib/session/similarity";
+import { postCallAgentTurns } from "~/lib/session/post-call-transcript";
+import type { TranscriptEntry } from "~/lib/voice/types";
 
 /** A cached realization for this template at this language and level, if any. */
 export const findCachedScenario = async (
@@ -143,6 +145,43 @@ export const recordAttempt = async (input: AttemptInput): Promise<void> => {
   });
 };
 
+export type MessageInput = Omit<TranscriptEntry, "createdAt"> & { sessionId: string };
+
+/** Persist one SDK transcript event. A stable client id makes retries harmless. */
+export const recordMessage = async (input: MessageInput): Promise<void> => {
+  await db
+    .insert(schema.message)
+    .values({
+      id: input.id,
+      sessionId: input.sessionId,
+      eventId: input.eventId,
+      role: input.role,
+      body: input.text,
+      recommendedTerms: input.recommendedTerms,
+      agentResponseMs: input.agentResponseMs,
+      modelResponseMs: input.modelResponseMs,
+      modelName: input.modelName,
+    })
+    .onConflictDoUpdate({
+      target: schema.message.id,
+      set: {
+        eventId: input.eventId,
+        body: input.text,
+        recommendedTerms: input.recommendedTerms,
+        agentResponseMs: input.agentResponseMs,
+        modelResponseMs: input.modelResponseMs,
+        modelName: input.modelName,
+      },
+    });
+};
+
+export const listSessionMessages = async (sessionId: string) =>
+  db
+    .select()
+    .from(schema.message)
+    .where(eq(schema.message.sessionId, sessionId))
+    .orderBy(asc(schema.message.createdAt));
+
 export const endSession = async (
   sessionId: string,
   outcome: "goal-achieved" | "partial" | "abandoned" | "out-of-time",
@@ -159,6 +198,7 @@ export type SessionDebrief = {
   settings: SessionSettings;
   scenario: Scenario | null;
   attempts: (typeof schema.attempt.$inferSelect)[];
+  messages: (typeof schema.message.$inferSelect)[];
 };
 
 export const getDebrief = async (sessionId: string): Promise<SessionDebrief | null> => {
@@ -172,12 +212,14 @@ export const getDebrief = async (sessionId: string): Promise<SessionDebrief | nu
     .orderBy(schema.attempt.createdAt);
 
   const settings = sessionSettingsSchema.safeParse(row.settings);
+  const messages = await listSessionMessages(sessionId);
 
   return {
     session: row,
     settings: settings.success ? settings.data : ({} as SessionSettings),
     scenario: await getScenario(row.scenarioId),
     attempts,
+    messages,
   };
 };
 
@@ -187,11 +229,37 @@ export const attachAnalysis = async (
   analysis: unknown,
   transcript: unknown,
 ): Promise<boolean> => {
-  const result = await db
+  const [sessionRow] = await db
+    .select({ id: schema.session.id })
+    .from(schema.session)
+    .where(eq(schema.session.conversationId, conversationId))
+    .limit(1);
+  if (!sessionRow) return false;
+
+  await db
     .update(schema.session)
     .set({ analysis, transcript })
-    .where(and(eq(schema.session.conversationId, conversationId)));
-  return result.rowsAffected > 0;
+    .where(eq(schema.session.id, sessionRow.id));
+
+  const storedAgentTurns = (await listSessionMessages(sessionRow.id)).filter(
+    (entry) => entry.role === "agent",
+  );
+  const enrichedTurns = postCallAgentTurns(transcript);
+  for (const [index, enriched] of enrichedTurns.entries()) {
+    const target =
+      storedAgentTurns.find(
+        (entry) => enriched.eventId !== undefined && entry.eventId === enriched.eventId,
+      ) ?? storedAgentTurns[index];
+    if (!target) continue;
+    await db
+      .update(schema.message)
+      .set({
+        modelResponseMs: enriched.modelResponseMs,
+        modelName: enriched.modelName,
+      })
+      .where(and(eq(schema.message.sessionId, sessionRow.id), eq(schema.message.id, target.id)));
+  }
+  return true;
 };
 
 export const listRecentSessions = async (limit = 20) =>
@@ -203,7 +271,19 @@ export const listRecentSessions = async (limit = 20) =>
       endedAt: schema.session.endedAt,
       outcome: schema.session.outcome,
       summary: schema.session.summary,
+      title: schema.scenario.title,
+      conversationId: schema.session.conversationId,
     })
     .from(schema.session)
+    .leftJoin(schema.scenario, eq(schema.session.scenarioId, schema.scenario.id))
     .orderBy(desc(schema.session.startedAt))
     .limit(limit);
+
+export const getSessionRecord = async (sessionId: string) => {
+  const [row] = await db
+    .select()
+    .from(schema.session)
+    .where(eq(schema.session.id, sessionId))
+    .limit(1);
+  return row ?? null;
+};

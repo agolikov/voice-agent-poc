@@ -185,10 +185,22 @@ const attempts = [
   ["farewell", "answer", "Muchas gracias, hasta luego.", "Muchas gracias, hasta luego.", "answered", "", null, 100],
 ];
 
+const messages = [
+  ["agent", "Buenas tardes. ¿En qué puedo ayudarle?", [], null, 510, "gemini-2.0-flash"],
+  ["learner", "Buenas tardes, me duele la garganta.", ["la garganta", "me duele la garganta"], null, null, null],
+  ["agent", "¿Desde cuándo le duele?", [], 820, 370, "gemini-2.0-flash"],
+  ["learner", "Desde hace tres días y tengo dolor de cabeza.", ["desde hace tres días", "dolor de cabeza"], null, null, null],
+  ["agent", "¿Es alérgica a algún medicamento?", [], 1760, 910, "gemini-2.0-flash"],
+  ["learner", "No, no soy alérgica a nada.", ["alérgico"], null, null, null],
+  ["agent", "Tengo pastillas o un jarabe. ¿Qué prefiere?", [], 3380, 1680, "gemini-2.0-flash"],
+  ["learner", "Prefiero el jarabe. ¿Cuántas veces al día?", ["el jarabe", "cuántas veces al día"], null, null, null],
+];
+
 const now = Math.floor(Date.now() / 1000);
 
 await db.batch(
   [
+    { sql: "delete from message where session_id = ?", args: [sessionId] },
     { sql: "delete from attempt where session_id = ?", args: [sessionId] },
     { sql: "delete from session where id = ?", args: [sessionId] },
     { sql: "delete from scenario where id = ?", args: [scenarioId] },
@@ -221,6 +233,22 @@ await db.batch(
       sql: `insert into attempt (id, session_id, beat_id, kind, heard, expected, verdict, correction, category, score, created_at)
             values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [randomUUID(), sessionId, beatId, kind, heard, expected, verdict, correction, category, score, now - 400 + index * 30],
+    })),
+    ...messages.map(([role, body, recommendedTerms, agentResponseMs, modelResponseMs, modelName], index) => ({
+      sql: `insert into message (id, session_id, event_id, role, body, recommended_terms, agent_response_ms, model_response_ms, model_name, created_at)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        randomUUID(),
+        sessionId,
+        index + 1,
+        role,
+        body,
+        JSON.stringify(recommendedTerms),
+        agentResponseMs,
+        modelResponseMs,
+        modelName,
+        now - 390 + index * 12,
+      ],
     })),
   ],
   "write",

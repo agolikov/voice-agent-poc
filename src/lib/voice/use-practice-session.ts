@@ -5,6 +5,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useConversation, useConversationClientTool } from "@elevenlabs/react";
 
 import type { Scenario } from "~/lib/scenario/schema";
+import {
+  findRecommendedTerms,
+  scenarioRecommendedTerms,
+} from "~/lib/session/recommended-terms";
 import type { SessionSettings } from "~/lib/session/settings";
 import type {
   ActiveHint,
@@ -54,6 +58,8 @@ export const usePracticeSession = (scenario: Scenario, settings: SessionSettings
   // change: the SDK keeps the latest closure, but the id is needed synchronously.
   const sessionIdRef = useRef<string | null>(null);
   const beatIndexRef = useRef(0);
+  const lastLearnerAtRef = useRef<number | null>(null);
+  const recommendations = scenarioRecommendedTerms(scenario);
 
   const conversation = useConversation({
     onConnect: () => setStatus("live"),
@@ -62,11 +68,28 @@ export const usePracticeSession = (scenario: Scenario, settings: SessionSettings
       setError(typeof message === "string" ? message : "The call failed.");
       setStatus("error");
     },
-    onMessage: ({ message, source }) => {
-      setTranscript((entries) => [
-        ...entries,
-        { id: newId(), role: source === "ai" ? "agent" : "learner", text: message },
-      ]);
+    onMessage: ({ message, source, event_id: eventId }) => {
+      const role = source === "ai" ? "agent" : "learner";
+      const now = performance.now();
+      const agentResponseMs =
+        role === "agent" && lastLearnerAtRef.current !== null
+          ? Math.max(0, Math.round(now - lastLearnerAtRef.current))
+          : undefined;
+      if (role === "learner") lastLearnerAtRef.current = now;
+
+      const entry: TranscriptEntry = {
+        id: newId(),
+        eventId,
+        role,
+        text: message,
+        recommendedTerms:
+          role === "learner" ? findRecommendedTerms(message, recommendations) : [],
+        agentResponseMs,
+      };
+      setTranscript((entries) => [...entries, entry]);
+      if (sessionIdRef.current) {
+        postJson(`/api/sessions/${sessionIdRef.current}/messages`, entry);
+      }
     },
   });
 

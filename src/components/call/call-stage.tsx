@@ -122,7 +122,7 @@ export const CallStage = ({ scenario, settings }: Props) => {
       <div className="space-y-4">
         <Card className="p-5">
           <h2 className="mb-3 font-serif text-base text-ink">Transcript</h2>
-          <Transcript entries={session.transcript} />
+          <Transcript entries={session.transcript} live />
         </Card>
 
         {scenario.vocabulary.length > 0 ? (

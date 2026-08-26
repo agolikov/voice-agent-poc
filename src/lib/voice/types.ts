@@ -41,8 +41,14 @@ export type ActiveHint = {
 
 export type TranscriptEntry = {
   id: string;
+  eventId?: number;
   role: "agent" | "learner";
   text: string;
+  recommendedTerms: string[];
+  agentResponseMs?: number;
+  modelResponseMs?: number;
+  modelName?: string;
+  createdAt?: string;
 };
 
 export type LoggedMistake = {

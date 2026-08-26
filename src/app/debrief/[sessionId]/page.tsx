@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Card } from "~/components/ui";
+import { Transcript } from "~/components/call/transcript";
 import { getDebrief } from "~/lib/db/queries";
 
 type Props = { params: Promise<{ sessionId: string }> };
@@ -26,7 +27,7 @@ const DebriefPage = async ({ params }: Props) => {
   const debrief = await getDebrief(sessionId);
   if (!debrief) notFound();
 
-  const { session, scenario, attempts } = debrief;
+  const { session, scenario, attempts, messages } = debrief;
 
   const repeats = attempts.filter((attempt) => attempt.kind === "repeat");
   const answers = attempts.filter((attempt) => attempt.kind === "answer");
@@ -66,6 +67,53 @@ const DebriefPage = async ({ params }: Props) => {
             <p className="mt-0.5 text-xs text-ink-soft">{stat.label}</p>
           </Card>
         ))}
+      </section>
+
+      <section className="mt-8">
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
+          <h2 className="font-serif text-lg text-ink">Conversation</h2>
+          <div className="flex flex-wrap gap-3 text-xs">
+            <Link
+              href={`/api/sessions/${session.id}/transcript`}
+              className="text-accent hover:underline"
+            >
+              Download chat
+            </Link>
+            {session.conversationId ? (
+              <Link
+                href={`/api/sessions/${session.id}/audio`}
+                className="text-accent hover:underline"
+              >
+                Download speech recording
+              </Link>
+            ) : (
+              <span className="text-ink-soft" title="No ElevenLabs recording is attached">
+                Recording unavailable
+              </span>
+            )}
+          </div>
+        </div>
+        <Card className="p-4">
+          {messages.length > 0 ? (
+            <Transcript
+              entries={messages.map((message) => ({
+                id: message.id,
+                eventId: message.eventId ?? undefined,
+                role: message.role,
+                text: message.body,
+                recommendedTerms: message.recommendedTerms,
+                agentResponseMs: message.agentResponseMs ?? undefined,
+                modelResponseMs: message.modelResponseMs ?? undefined,
+                modelName: message.modelName ?? undefined,
+                createdAt: message.createdAt.toISOString(),
+              }))}
+            />
+          ) : (
+            <p className="text-sm text-ink-soft">
+              No live transcript was saved for this session. Older sessions may still have raw post-call data below.
+            </p>
+          )}
+        </Card>
       </section>
 
       {mistakes.length > 0 ? (
@@ -139,12 +187,15 @@ const DebriefPage = async ({ params }: Props) => {
       ) : null}
 
       {scenario ? (
-        <div className="mt-8">
+        <div className="mt-8 flex flex-wrap gap-4">
           <Link
             href={`/practice/${scenario.id}`}
             className="text-sm text-accent hover:underline"
           >
             Run this situation again
+          </Link>
+          <Link href="/history" className="text-sm text-accent hover:underline">
+            See past conversations
           </Link>
         </div>
       ) : null}
