@@ -1,0 +1,23 @@
+{
+  "name": "advanceBeat",
+  "description": "Move the learner's on-screen progress to a new beat. Call this each time you begin a beat.",
+  "type": "client",
+  "expects_response": false,
+  "response_timeout_secs": 10,
+  "parameters": {
+    "type": "object",
+    "description": "The beat now in play",
+    "properties": {
+      "beatIndex": {
+        "type": "number",
+        "description": "0-based index of the beat you are starting."
+      },
+      "satisfied": {
+        "type": "boolean",
+        "description": "Whether the previous beat was handled successfully by the learner."
+      }
+    },
+    "required": ["beatIndex", "satisfied"]
+  },
+  "dynamic_variables": { "dynamic_variable_placeholders": {} }
+}

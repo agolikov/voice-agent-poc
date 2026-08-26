@@ -1,0 +1,21 @@
+{
+  "name": "logMistake",
+  "description": "Record one discrete mistake worth remembering after the session. One call per mistake, not one per turn.",
+  "type": "client",
+  "expects_response": false,
+  "response_timeout_secs": 10,
+  "parameters": {
+    "type": "object",
+    "description": "The mistake",
+    "properties": {
+      "heard": { "type": "string", "description": "The wrong form the learner produced." },
+      "correction": { "type": "string", "description": "The correct form." },
+      "category": {
+        "type": "string",
+        "description": "One of: grammar, vocabulary, word-order, register, pronunciation."
+      }
+    },
+    "required": ["heard", "correction", "category"]
+  },
+  "dynamic_variables": { "dynamic_variable_placeholders": {} }
+}

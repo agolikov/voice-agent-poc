@@ -1,0 +1,23 @@
+{
+  "name": "recordAttempt",
+  "description": "Log one learner turn you have judged, including hint repetitions. This is what the end-of-session debrief is built from, so call it for every turn that carried a real attempt.",
+  "type": "client",
+  "expects_response": false,
+  "response_timeout_secs": 10,
+  "parameters": {
+    "type": "object",
+    "description": "The attempt to record",
+    "properties": {
+      "beatId": { "type": "string", "description": "The beat this attempt belongs to." },
+      "heard": { "type": "string", "description": "What the learner actually said." },
+      "expected": { "type": "string", "description": "What you were hoping for, or the model answer if this was a hint repetition." },
+      "verdict": {
+        "type": "string",
+        "description": "One of: 'answered' (unaided, acceptable), 'repeated' (repeated the hint acceptably), 'partial' (close but flawed), 'missed' (failed after the allowed attempts)."
+      },
+      "correction": { "type": "string", "description": "The corrected form, or an empty string if nothing needed correcting." }
+    },
+    "required": ["beatId", "heard", "expected", "verdict", "correction"]
+  },
+  "dynamic_variables": { "dynamic_variable_placeholders": {} }
+}

@@ -1,0 +1,32 @@
+{
+  "slug": "asking-directions",
+  "title": "Lost in the city",
+  "source": "library",
+  "summary": "Ask a stranger for directions and actually follow them.",
+  "setting": "A street corner in an unfamiliar city, phone battery dead",
+  "agentRole": {
+    "name": "a passer-by",
+    "role": "a local hurrying somewhere",
+    "persona": "Helpful but in a rush. Gives directions quickly and with local landmarks the learner will not know unless they ask. Happy to repeat if asked."
+  },
+  "userRole": {
+    "role": "a visitor trying to reach the main station before a train leaves in forty minutes",
+    "goal": "Stop someone, get directions, check they understood, and find out if they will make it in time"
+  },
+  "beats": [
+    { "id": "stopping-someone", "intent": "Get the learner to interrupt politely and say what they need", "successCriteria": "They opened politely and named the destination" },
+    { "id": "the-directions", "intent": "Give directions fast, with two turns and a landmark", "successCriteria": "The learner heard them out" },
+    { "id": "checking", "intent": "Get the learner to repeat the directions back or ask for a repeat", "successCriteria": "They confirmed or asked again rather than guessing" },
+    { "id": "how-long", "intent": "Make the learner ask how long it takes on foot", "successCriteria": "They asked about time or distance" },
+    { "id": "alternative", "intent": "Mention a tram and let the learner ask which one and where to catch it", "successCriteria": "They asked a follow-up about the tram" },
+    { "id": "thanks", "intent": "Close the exchange", "successCriteria": "They thanked the person appropriately" }
+  ],
+  "vocabularyConcepts": ["excuse me", "straight on", "turn left", "on the corner", "opposite", "how far", "on foot", "the stop", "which line", "you cannot miss it"],
+  "closing": "Point them the right way one more time, wish them luck with the train, and hurry off",
+  "successCriteria": [
+    "The learner checked they had understood rather than nodding along",
+    "They asked how long it would take",
+    "They found out about the tram option"
+  ],
+  "suggestedLevel": "A2"
+}

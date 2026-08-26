@@ -1,0 +1,34 @@
+{
+  "tools": [
+    {
+      "type": "client",
+      "config": "agent/tool_configs/advanceBeat.json",
+      "name": "advanceBeat"
+    },
+    {
+      "type": "client",
+      "config": "agent/tool_configs/changeSituation.json",
+      "name": "changeSituation"
+    },
+    {
+      "type": "client",
+      "config": "agent/tool_configs/endScenario.json",
+      "name": "endScenario"
+    },
+    {
+      "type": "client",
+      "config": "agent/tool_configs/logMistake.json",
+      "name": "logMistake"
+    },
+    {
+      "type": "client",
+      "config": "agent/tool_configs/recordAttempt.json",
+      "name": "recordAttempt"
+    },
+    {
+      "type": "client",
+      "config": "agent/tool_configs/showHint.json",
+      "name": "showHint"
+    }
+  ]
+}

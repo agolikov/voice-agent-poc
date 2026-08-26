@@ -1,0 +1,32 @@
+{
+  "slug": "phone-call-landlord",
+  "title": "Phoning about a broken boiler",
+  "source": "library",
+  "summary": "A phone call with no faces and no gestures — the hardest kind.",
+  "setting": "A phone call to the landlord on a cold morning, bad signal, no visual cues at all",
+  "agentRole": {
+    "name": "the landlord",
+    "role": "a landlord taking a call about a repair",
+    "persona": "Distracted, on the road, half listening. Asks the learner to repeat things because of the signal. Tries to put the visit off until pressed."
+  },
+  "userRole": {
+    "role": "a tenant with no hot water for two days",
+    "goal": "Report the fault, convey the urgency, and pin down a specific day and time"
+  },
+  "beats": [
+    { "id": "identifying", "intent": "Get the learner to say who they are and which property", "successCriteria": "They identified themselves and the address" },
+    { "id": "the-fault", "intent": "Get a clear description of what is wrong and since when", "successCriteria": "The fault and duration were given" },
+    { "id": "repeat", "intent": "Claim not to have heard and make the learner repeat the key detail", "successCriteria": "They repeated it, louder or differently" },
+    { "id": "urgency", "intent": "Suggest next week and let the learner argue for sooner", "successCriteria": "They pushed back with a reason" },
+    { "id": "arranging", "intent": "Settle on a day and a time window", "successCriteria": "A specific day and time were agreed" },
+    { "id": "confirming", "intent": "Get the learner to confirm the arrangement back and ask for a text", "successCriteria": "They read the arrangement back" }
+  ],
+  "vocabularyConcepts": ["there is no hot water", "the boiler", "since Tuesday", "urgent", "can you repeat that", "a bad line", "to send someone", "in the morning", "to confirm", "to text me"],
+  "closing": "Confirm the day and time, promise to text, and end the call",
+  "successCriteria": [
+    "The learner coped with being asked to repeat themselves",
+    "They argued for a sooner visit",
+    "They read the arrangement back before hanging up"
+  ],
+  "suggestedLevel": "B2"
+}

@@ -1,0 +1,32 @@
+{
+  "slug": "renting-a-flat",
+  "title": "Viewing a flat",
+  "source": "library",
+  "summary": "View a flat, ask the awkward questions, and negotiate the terms.",
+  "setting": "A one-bedroom flat the learner is viewing, landlord showing them round",
+  "agentRole": {
+    "name": "the landlord",
+    "role": "a landlord showing a flat",
+    "persona": "Chatty and keen to let it quickly. Glosses over the bad bits unless asked directly. Will negotiate a little if pressed politely."
+  },
+  "userRole": {
+    "role": "someone looking for a flat who needs to move next month",
+    "goal": "Find out what is really included, raise a problem they noticed, and agree terms"
+  },
+  "beats": [
+    { "id": "first-impressions", "intent": "Show them round and get a reaction with a reason", "successCriteria": "An opinion with a reason was given" },
+    { "id": "what-is-included", "intent": "Get the learner to ask what the rent covers", "successCriteria": "They asked about bills, furniture or internet" },
+    { "id": "the-problem", "intent": "Get the learner to raise the damp patch or the noise from the street", "successCriteria": "They raised a concern directly" },
+    { "id": "terms", "intent": "State the deposit and contract length and let the learner react", "successCriteria": "They responded to both numbers" },
+    { "id": "negotiating", "intent": "See whether the learner asks for anything — earlier move-in, lower deposit, a repair", "successCriteria": "They asked for at least one thing" },
+    { "id": "deciding", "intent": "Push for a decision and get a clear answer, including 'I need to think'", "successCriteria": "A clear position was stated" }
+  ],
+  "vocabularyConcepts": ["the deposit", "bills included", "a lease", "furnished", "damp", "noisy", "to move in", "the landlord", "a viewing", "when is it available"],
+  "closing": "Say when you need an answer by, give them your number, and thank them for coming",
+  "successCriteria": [
+    "The learner asked what was included instead of assuming",
+    "They raised the problem they noticed",
+    "They gave a clear answer at the end"
+  ],
+  "suggestedLevel": "B1"
+}

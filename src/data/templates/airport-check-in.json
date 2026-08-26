@@ -1,0 +1,32 @@
+{
+  "slug": "airport-check-in",
+  "title": "Airport check-in",
+  "source": "library",
+  "summary": "Check in for a flight with a bag that is slightly over the limit.",
+  "setting": "A busy airport check-in desk, ninety minutes before departure",
+  "agentRole": {
+    "name": "the check-in agent",
+    "role": "an airline check-in agent",
+    "persona": "Professional and fast. Has a queue behind the learner and says so if things drag. Will not bend the rules, but offers the learner a way out if they ask."
+  },
+  "userRole": {
+    "role": "a passenger flying today with one suitcase that turns out to be two kilos overweight",
+    "goal": "Check in, deal with the overweight bag, and get a seat by the window"
+  },
+  "beats": [
+    { "id": "documents", "intent": "Ask for passport and booking, and get the learner to hand them over and say where they are flying", "successCriteria": "They have named a destination and offered their documents" },
+    { "id": "baggage", "intent": "Weigh the bag and tell the learner it is two kilos over", "successCriteria": "They have acknowledged the problem and asked what happens next" },
+    { "id": "resolution", "intent": "Offer paying a fee or moving items to hand luggage, and make the learner decide", "successCriteria": "They chose an option and said so clearly" },
+    { "id": "seat", "intent": "Get the learner to ask for a specific seat", "successCriteria": "They asked for a window or aisle seat" },
+    { "id": "security-questions", "intent": "Ask the standard packed-it-yourself questions", "successCriteria": "Both questions answered" },
+    { "id": "boarding", "intent": "Hand over the boarding pass and get the learner to ask about the gate or the time", "successCriteria": "They asked a follow-up question about boarding" }
+  ],
+  "vocabularyConcepts": ["boarding pass", "hand luggage", "overweight", "excess baggage fee", "window seat", "aisle seat", "gate", "boarding time", "check in", "passport"],
+  "closing": "Hand over the boarding pass, tell them the gate and the boarding time, and wish them a good flight",
+  "successCriteria": [
+    "The learner resolved the overweight bag without help from the agent",
+    "They asked for the seat they wanted rather than accepting what was offered",
+    "They know their gate and boarding time"
+  ],
+  "suggestedLevel": "B1"
+}

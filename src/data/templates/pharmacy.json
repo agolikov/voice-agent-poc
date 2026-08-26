@@ -1,0 +1,32 @@
+{
+  "slug": "pharmacy",
+  "title": "At the pharmacy",
+  "source": "library",
+  "summary": "Describe a symptom to a pharmacist and walk out with the right thing.",
+  "setting": "A neighbourhood pharmacy, late evening, one other customer waiting behind you",
+  "agentRole": {
+    "name": "the pharmacist",
+    "role": "a pharmacist on the evening shift",
+    "persona": "Brisk but kind. Asks one question at a time. Slightly rushed because the shop closes soon, which is why they do not fill silences for you."
+  },
+  "userRole": {
+    "role": "a customer who has had a sore throat and a headache for three days",
+    "goal": "Explain the symptoms, answer the pharmacist's questions, and leave with something to take"
+  },
+  "beats": [
+    { "id": "greeting", "intent": "Get the learner to greet and open with why they are there", "successCriteria": "They have greeted and named a symptom, however roughly" },
+    { "id": "symptoms", "intent": "Get the learner to describe how long it has lasted and how bad it is", "successCriteria": "A duration and some sense of severity have been given" },
+    { "id": "allergies", "intent": "Ask about allergies and other medication, and get a real answer", "successCriteria": "The learner has answered yes or no with at least one detail" },
+    { "id": "recommendation", "intent": "Offer two options and get the learner to choose one and ask about dosage", "successCriteria": "They picked one and asked how or how often to take it" },
+    { "id": "paying", "intent": "Get the learner through paying and asking for a receipt or a bag", "successCriteria": "Payment is settled and they have asked for one extra thing" },
+    { "id": "farewell", "intent": "Close the exchange politely", "successCriteria": "They have said goodbye appropriately" }
+  ],
+  "vocabularyConcepts": ["sore throat", "headache", "painkiller", "lozenge", "allergic", "prescription", "dosage", "three times a day", "receipt", "with food"],
+  "closing": "Wish them well, tell them to come back if it does not improve in a few days, and say goodbye",
+  "successCriteria": [
+    "The learner described their symptoms without switching languages",
+    "They answered the allergy question with a real answer rather than a shrug",
+    "They left knowing how to take what they bought"
+  ],
+  "suggestedLevel": "A2"
+}

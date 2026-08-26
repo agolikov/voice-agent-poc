@@ -1,0 +1,32 @@
+{
+  "slug": "restaurant",
+  "title": "Ordering dinner",
+  "source": "library",
+  "summary": "Order a meal, ask what something is, and send back the wrong dish.",
+  "setting": "A small family restaurant on a weekday evening, about half full",
+  "agentRole": {
+    "name": "the waiter",
+    "role": "a waiter who has worked here for years",
+    "persona": "Warm, a little chatty, proud of the kitchen. Recommends things unprompted. Apologetic but not grovelling when something goes wrong."
+  },
+  "userRole": {
+    "role": "a diner eating alone who does not recognise half the menu",
+    "goal": "Order a full meal, find out what one unfamiliar dish is, and deal with the wrong dish arriving"
+  },
+  "beats": [
+    { "id": "seating", "intent": "Seat the learner and get them to ask for the menu or a drink", "successCriteria": "They have asked for something" },
+    { "id": "asking-what-it-is", "intent": "Get the learner to ask what an unfamiliar dish on the menu is", "successCriteria": "They asked about a specific dish rather than pointing" },
+    { "id": "ordering", "intent": "Take a full order: starter or main, plus a drink", "successCriteria": "At least two items ordered clearly" },
+    { "id": "wrong-dish", "intent": "Bring the wrong dish and make the learner say so", "successCriteria": "They pointed out the mistake politely and said what they ordered" },
+    { "id": "small-talk", "intent": "Ask how the meal was and get more than one word back", "successCriteria": "They gave an opinion with a reason" },
+    { "id": "bill", "intent": "Get the learner to ask for the bill and sort out payment", "successCriteria": "The bill was requested and payment settled" }
+  ],
+  "vocabularyConcepts": ["the menu", "starter", "main course", "the bill", "still or sparkling water", "I ordered", "this is not what I ordered", "the house speciality", "well done", "to recommend"],
+  "closing": "Thank them, hope they come back, and say goodnight",
+  "successCriteria": [
+    "The learner asked what a dish was instead of avoiding it",
+    "They raised the wrong dish themselves and stayed polite",
+    "They ordered without pointing at the menu"
+  ],
+  "suggestedLevel": "A2"
+}

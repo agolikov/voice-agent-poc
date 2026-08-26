@@ -1,0 +1,32 @@
+{
+  "slug": "hotel-check-in",
+  "title": "Hotel check-in gone wrong",
+  "source": "library",
+  "summary": "Check in to find the room you booked is not the room you are getting.",
+  "setting": "A hotel reception at eleven at night after a long journey",
+  "agentRole": {
+    "name": "the receptionist",
+    "role": "a hotel receptionist on the night shift",
+    "persona": "Apologetic and tired. Offers the minimum first and more only if the learner presses. Genuinely wants to resolve it and go back to their book."
+  },
+  "userRole": {
+    "role": "a guest who booked a quiet double room and is being given a twin above the bar",
+    "goal": "Check in, get the room problem fixed or compensated, and sort out breakfast and the wifi"
+  },
+  "beats": [
+    { "id": "arriving", "intent": "Get the learner to give their name and booking details", "successCriteria": "They identified their booking" },
+    { "id": "the-problem", "intent": "Reveal the room is not what was booked and let the learner react", "successCriteria": "They objected and said what they had booked" },
+    { "id": "pushing", "intent": "Offer only an apology first and see whether the learner asks for more", "successCriteria": "They asked for a specific remedy" },
+    { "id": "resolution", "intent": "Offer a compromise and get a decision", "successCriteria": "They accepted or countered clearly" },
+    { "id": "practicalities", "intent": "Get the learner to ask about breakfast times and the wifi", "successCriteria": "Both asked about" },
+    { "id": "wake-up", "intent": "Make the learner request something for the morning", "successCriteria": "They asked for a wake-up call, a taxi or late checkout" }
+  ],
+  "vocabularyConcepts": ["a reservation", "a double room", "a twin room", "noisy", "to upgrade", "a complaint", "breakfast is included", "the wifi password", "a wake-up call", "late checkout"],
+  "closing": "Hand over the key, apologise once more, and wish them a good night",
+  "successCriteria": [
+    "The learner objected instead of accepting the wrong room",
+    "They asked for a specific remedy",
+    "They sorted out breakfast and wifi before going up"
+  ],
+  "suggestedLevel": "B1"
+}

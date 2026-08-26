@@ -1,0 +1,32 @@
+{
+  "slug": "buying-a-sim",
+  "title": "Buying a SIM card",
+  "source": "library",
+  "summary": "Compare two plans you do not fully understand and pick one.",
+  "setting": "A phone shop in a shopping centre, Saturday afternoon",
+  "agentRole": {
+    "name": "the sales assistant",
+    "role": "a phone shop sales assistant on commission",
+    "persona": "Enthusiastic and fast-talking. Pushes the expensive plan first. Uses jargon and only explains it when asked."
+  },
+  "userRole": {
+    "role": "a newcomer who needs data and cheap calls home, staying six months",
+    "goal": "Understand the two plans, ask about the catch, and buy the one that actually fits"
+  },
+  "beats": [
+    { "id": "what-do-you-need", "intent": "Find out what the learner needs the phone for", "successCriteria": "They described their needs" },
+    { "id": "the-pitch", "intent": "Pitch the expensive plan with jargon in it", "successCriteria": "The learner heard it out" },
+    { "id": "asking-what-that-means", "intent": "Get the learner to ask what a term means", "successCriteria": "They asked about a specific word" },
+    { "id": "comparing", "intent": "Present a cheaper plan and let the learner compare the two", "successCriteria": "They compared them out loud" },
+    { "id": "the-catch", "intent": "Make the learner ask about contract length or hidden charges", "successCriteria": "They asked about the commitment or the extras" },
+    { "id": "buying", "intent": "Complete the purchase and get the learner to ask how to activate it", "successCriteria": "They asked how to set it up" }
+  ],
+  "vocabularyConcepts": ["a data plan", "unlimited", "prepaid", "a contract", "to top up", "coverage", "international calls", "what does that mean", "per month", "to activate"],
+  "closing": "Confirm what they bought, explain activation in one sentence, and hand over the receipt",
+  "successCriteria": [
+    "The learner asked what an unfamiliar term meant",
+    "They compared the plans rather than taking the first one",
+    "They know how to activate the SIM"
+  ],
+  "suggestedLevel": "B1"
+}

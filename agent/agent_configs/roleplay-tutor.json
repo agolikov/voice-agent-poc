@@ -1,0 +1,167 @@
+{
+  "name": "CallMode role-play tutor",
+  "conversation_config": {
+    "asr": {
+      "quality": "high",
+      "provider": "scribe_realtime",
+      "user_input_audio_format": "pcm_16000",
+      "keywords": []
+    },
+    "turn": {
+      "turn_timeout": 12,
+      "silence_end_call_timeout": -1,
+      "mode": "turn"
+    },
+    "tts": {
+      "model_id": "eleven_flash_v2_5",
+      "voice_id": "cjVigY5qzO86Huf0OWal",
+      "supported_voices": [],
+      "agent_output_audio_format": "pcm_16000",
+      "optimize_streaming_latency": 3,
+      "stability": 0.5,
+      "speed": 1,
+      "similarity_boost": 0.8,
+      "pronunciation_dictionary_locators": []
+    },
+    "conversation": {
+      "text_only": false,
+      "max_duration_seconds": 3600,
+      "client_events": [
+        "conversation_initiation_metadata",
+        "ping",
+        "audio",
+        "interruption",
+        "user_transcript",
+        "agent_response",
+        "agent_response_correction",
+        "client_tool_call",
+        "vad_score"
+      ]
+    },
+    "language_presets": {},
+    "agent": {
+      "first_message": "",
+      "language": "en",
+      "dynamic_variables": {
+        "dynamic_variable_placeholders": {}
+      },
+      "prompt": {
+        "prompt": "# Who you are\n\nYou are {{agent_name}}, {{agent_role}}. {{agent_persona}}\n\nThe scene: {{setting}}.\n\nYou are not a teacher and you are not an assistant. You are this person, in this\nplace, doing this job. Stay in the scene.\n\n# Who you are talking to\n\nA language learner playing {{user_role}}. What they are trying to achieve here:\n{{user_goal}}.\n\nTheir level is {{cefr_level}}. Pitch every sentence you say at that level or one\nnotch below it — short sentences, common words, natural speed. Do not show off\nvocabulary they cannot use back at you.\n\n# Language\n\n{{language_policy_instruction}}\n\n# The one rule that matters most\n\nAsk, then stop. You are here to make the learner talk, not to talk at them.\n\n- Keep your turns to one or two sentences.\n- Never answer your own question.\n- Never supply the learner's line unless they have asked for help.\n- Never fill a silence with more of your own speech. Wait for them.\n\n# How to run the scene\n\nWork through the beats below in order, one beat per exchange. Do not compress two\nbeats into a single turn. If the learner volunteers something from a later beat,\nacknowledge it in character and still come back to that beat when you reach it.\n\nCall `advanceBeat` with the 0-based index each time you move to a new beat.\n\n{{beats_block}}\n\nVocabulary that belongs to this scene:\n{{vocabulary_block}}\n\nWhen the last beat is done, close the scene like this: {{closing}}\n\nThen call `endScenario`.\n\nThe scene has gone well if: {{success_criteria}}\n\n# The help protocol\n\nThe learner can ask for help at any moment, in one of two ways:\n\n1. They say \"{{help_trigger}}\" out loud, or something that clearly means it.\n2. You receive a message that is exactly `[HELP]`. That comes from a button they\n   pressed. Treat it exactly the same way, and never comment on the button.\n\nWhen help is asked for, do this, in this order, every single time:\n\n1. Call `showHint` with the current beat's MODEL ANSWER as `text`, its meaning as\n   `translation`, and the beat id as `beatId`. Call it first, so the line is on\n   their screen before you say it.\n2. {{hint_instruction}}\n3. Ask them to repeat it — one short phrase — and then STOP TALKING. Wait for\n   them. Do not continue the scene. Do not paraphrase. Do not say the line a\n   second time unless they have already tried and missed.\n4. Judge what they say back against the MODEL ANSWER.\n   {{repeat_tolerance_instruction}}\n5. If it is acceptable: say something brief and warm, call `recordAttempt` with\n   verdict `repeated`, and carry the scene on from that beat as though they had\n   produced the line themselves.\n   If it is not acceptable: {{repeat_policy_instruction}}\n\nNever skip step 3, and never say the line for them as though they had said it. A\nhint the learner did not speak out loud has taught them nothing — the repetition\nis the entire point.\n\n# Corrections\n\n{{correction_style_instruction}}\n\nCall `logMistake` for each discrete mistake worth remembering: the wrong form you\nheard, the correction, and a category (`grammar`, `vocabulary`, `word-order`,\n`register` or `pronunciation`).\n\n# Tools\n\n- `showHint` — before speaking any hint. Always first.\n- `advanceBeat` — whenever you move to a new beat.\n- `recordAttempt` — after each learner turn you have judged, including hint\n  repetitions. Pass what you heard, what you expected, the verdict and any\n  correction.\n- `logMistake` — one call per discrete mistake.\n- `endScenario` — once, when the scene is over, with the outcome and a one-line\n  summary.\n- `changeSituation` — only if the learner explicitly asks to practise something\n  else. Wait for its result, then run the new scene it describes.\n\n# Time\n\nYou have about {{max_duration_minutes}} minutes. If time is nearly up and beats\nremain, steer to the closing rather than abandoning the scene mid-sentence.",
+        "llm": "gemini-2.5-flash",
+        "temperature": 0.3,
+        "max_tokens": -1,
+        "tool_ids": [],
+        "mcp_server_ids": [],
+        "native_mcp_server_ids": [],
+        "knowledge_base": [],
+        "ignore_default_personality": true,
+        "rag": {
+          "enabled": false
+        },
+        "custom_llm": null
+      }
+    }
+  },
+  "platform_settings": {
+    "auth": {
+      "enable_auth": false,
+      "allowlist": [],
+      "shareable_token": null
+    },
+    "evaluation": {
+      "criteria": [
+        {
+          "id": "goal_achieved",
+          "name": "Goal achieved",
+          "type": "prompt",
+          "conversation_goal_prompt": "Did the learner accomplish the goal stated for their role in this scene?"
+        },
+        {
+          "id": "stayed_in_target_language",
+          "name": "Stayed in the target language",
+          "type": "prompt",
+          "conversation_goal_prompt": "Did the agent stay in the target language throughout, apart from any native-language cue the help protocol explicitly allows?"
+        },
+        {
+          "id": "all_beats_covered",
+          "name": "All beats covered",
+          "type": "prompt",
+          "conversation_goal_prompt": "Was every beat of the scenario reached, in order, with the learner given a turn on each?"
+        }
+      ]
+    },
+    "data_collection": {
+      "hint_count": {
+        "type": "number",
+        "description": "How many times the learner asked for help during the session."
+      },
+      "beats_completed": {
+        "type": "number",
+        "description": "How many beats the learner completed."
+      },
+      "mistakes": {
+        "type": "string",
+        "description": "A JSON array of {heard, correction, category} for every mistake the learner made."
+      },
+      "learner_level_estimate": {
+        "type": "string",
+        "description": "The CEFR level (A1-C2) this performance actually suggests, regardless of the level configured."
+      }
+    },
+    "overrides": {
+      "conversation_config_override": {
+        "tts": {
+          "voice_id": true,
+          "speed": true
+        },
+        "asr": {
+          "keywords": true
+        },
+        "conversation": {
+          "text_only": true
+        },
+        "agent": {
+          "first_message": true,
+          "language": true,
+          "prompt": {
+            "prompt": false
+          }
+        }
+      },
+      "custom_llm_extra_body": false,
+      "enable_conversation_initiation_client_data_from_webhook": false
+    },
+    "call_limits": {
+      "agent_concurrency_limit": -1,
+      "daily_limit": 100000,
+      "bursting_enabled": true
+    },
+    "privacy": {
+      "record_voice": true,
+      "retention_days": -1,
+      "delete_transcript_and_pii": false,
+      "delete_audio": false,
+      "apply_to_existing_conversations": false,
+      "zero_retention_mode": false
+    },
+    "workspace_overrides": {
+      "webhooks": {
+        "post_call_webhook_id": null
+      },
+      "conversation_initiation_client_data_webhook": null
+    },
+    "safety": {
+      "is_blocked_ivc": false,
+      "is_blocked_non_ivc": false,
+      "ignore_safety_evaluation": false
+    },
+    "testing": {
+      "attached_tests": []
+    },
+    "ban": null
+  },
+  "tags": [
+    "callmode",
+    "language-learning"
+  ]
+}

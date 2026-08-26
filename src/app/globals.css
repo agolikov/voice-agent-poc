@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+
+  --color-ink: oklch(0.22 0.02 60);
+  --color-ink-soft: oklch(0.46 0.02 60);
+  --color-paper: oklch(0.985 0.008 85);
+  --color-card: oklch(1 0 0);
+  --color-rule: oklch(0.9 0.012 75);
+  --color-accent: oklch(0.52 0.13 165);
+  --color-accent-soft: oklch(0.95 0.03 165);
+  --color-warn: oklch(0.62 0.15 55);
+  --color-warn-soft: oklch(0.96 0.04 65);
+  --color-flag: oklch(0.55 0.16 20);
+  --color-flag-soft: oklch(0.96 0.03 20);
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-ink: oklch(0.93 0.008 85);
+    --color-ink-soft: oklch(0.7 0.012 85);
+    --color-paper: oklch(0.18 0.012 70);
+    --color-card: oklch(0.23 0.014 70);
+    --color-rule: oklch(0.32 0.014 70);
+    --color-accent: oklch(0.72 0.12 165);
+    --color-accent-soft: oklch(0.29 0.04 165);
+    --color-warn: oklch(0.78 0.12 60);
+    --color-warn-soft: oklch(0.3 0.04 60);
+    --color-flag: oklch(0.72 0.14 22);
+    --color-flag-soft: oklch(0.3 0.04 22);
+  }
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}

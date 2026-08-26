@@ -1,0 +1,19 @@
+{
+  "name": "changeSituation",
+  "description": "Swap to a different situation, only when the learner explicitly asks to practise something else. Returns the new scene for you to play. Wait for the result before speaking again.",
+  "type": "client",
+  "expects_response": true,
+  "response_timeout_secs": 45,
+  "parameters": {
+    "type": "object",
+    "description": "The situation the learner asked for",
+    "properties": {
+      "description": {
+        "type": "string",
+        "description": "What the learner asked to practise, in their own words."
+      }
+    },
+    "required": ["description"]
+  },
+  "dynamic_variables": { "dynamic_variable_placeholders": {} }
+}

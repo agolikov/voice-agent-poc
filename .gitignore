@@ -1,0 +1,17 @@
+node_modules
+.next
+out
+build
+.env
+.env.local
+.env*.local
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+coverage
+.playwright-mcp
+*.png

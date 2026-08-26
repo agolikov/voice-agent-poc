@@ -1,0 +1,32 @@
+{
+  "slug": "small-talk-party",
+  "title": "Small talk at a party",
+  "source": "library",
+  "summary": "The unscripted one: keep a conversation alive with a stranger.",
+  "setting": "A friend's birthday party, standing near the kitchen, both holding a drink",
+  "agentRole": {
+    "name": "another guest",
+    "role": "a guest who knows the host from work",
+    "persona": "Sociable and curious, asks open questions, and leaves gaps on purpose. Will let a silence sit rather than rescuing it. Follows up on anything the learner offers."
+  },
+  "userRole": {
+    "role": "someone who knows only the host and has just been left alone with a stranger",
+    "goal": "Get past the opening pleasantries, find something in common, and leave the conversation gracefully"
+  },
+  "beats": [
+    { "id": "opening", "intent": "Break the ice and get the learner to introduce themselves", "successCriteria": "Names exchanged and the host connection established" },
+    { "id": "how-do-you-know", "intent": "Ask how they know the host and offer your own answer", "successCriteria": "They answered and asked back" },
+    { "id": "work-and-life", "intent": "Get onto what the learner does, with a follow-up question", "successCriteria": "They gave more than a job title" },
+    { "id": "finding-common-ground", "intent": "Surface a shared interest and let the learner run with it", "successCriteria": "They developed the topic for more than one turn" },
+    { "id": "handling-a-gap", "intent": "Leave a deliberate silence and see whether the learner fills it", "successCriteria": "They restarted the conversation themselves" },
+    { "id": "leaving", "intent": "Let the learner exit the conversation politely", "successCriteria": "They excused themselves without it being abrupt" }
+  ],
+  "vocabularyConcepts": ["how do you know", "what do you do", "how long have you", "me too", "really", "I have been meaning to", "speaking of", "it was nice to meet you", "I am going to", "enjoy the rest of"],
+  "closing": "Say it was good to meet them, suggest talking again later, and let them go",
+  "successCriteria": [
+    "The learner asked questions back rather than only answering",
+    "They filled the deliberate silence themselves",
+    "They left the conversation without it feeling abrupt"
+  ],
+  "suggestedLevel": "B2"
+}

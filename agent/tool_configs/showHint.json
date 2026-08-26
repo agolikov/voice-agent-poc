@@ -1,0 +1,27 @@
+{
+  "name": "showHint",
+  "description": "Put the model answer on the learner's screen. Call this BEFORE speaking any hint, so the line they must repeat is visible while they hear it. Pass the current beat's MODEL ANSWER verbatim.",
+  "type": "client",
+  "expects_response": false,
+  "response_timeout_secs": 10,
+  "parameters": {
+    "type": "object",
+    "description": "The hint to display",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "The model answer in the target language, exactly as the learner must repeat it."
+      },
+      "translation": {
+        "type": "string",
+        "description": "What the model answer means, in the learner's native language."
+      },
+      "beatId": {
+        "type": "string",
+        "description": "The id of the beat this hint belongs to."
+      }
+    },
+    "required": ["text", "translation", "beatId"]
+  },
+  "dynamic_variables": { "dynamic_variable_placeholders": {} }
+}

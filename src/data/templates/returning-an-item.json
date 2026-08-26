@@ -1,0 +1,32 @@
+{
+  "slug": "returning-an-item",
+  "title": "Returning a faulty item",
+  "source": "library",
+  "summary": "Return a laptop that stopped charging, without the receipt.",
+  "setting": "The customer service counter of an electronics shop, two weeks after the purchase",
+  "agentRole": {
+    "name": "the shop assistant",
+    "role": "a customer service assistant",
+    "persona": "Polite but defensive of shop policy. Says no once before finding a way to help. Responds well to a learner who stays calm and specific."
+  },
+  "userRole": {
+    "role": "a customer whose laptop stopped charging after two weeks, receipt lost but the card statement is on their phone",
+    "goal": "Get a repair, replacement or refund despite having no receipt"
+  },
+  "beats": [
+    { "id": "opening", "intent": "Get the learner to state the problem in one clear sentence", "successCriteria": "The fault has been named" },
+    { "id": "when-and-what", "intent": "Ask when it was bought and what exactly happens", "successCriteria": "A date and a description of the fault were given" },
+    { "id": "no-receipt", "intent": "Ask for the receipt and refuse once when it is missing", "successCriteria": "The learner offered an alternative proof rather than giving up" },
+    { "id": "what-they-want", "intent": "Make the learner say whether they want a repair, a replacement or their money back", "successCriteria": "They stated which one and why" },
+    { "id": "negotiation", "intent": "Offer only a repair and see whether the learner pushes for more", "successCriteria": "They either accepted with a condition or pushed back" },
+    { "id": "paperwork", "intent": "Take details and get the learner to ask how long it will take", "successCriteria": "They asked about timing or how they will be contacted" }
+  ],
+  "vocabularyConcepts": ["a refund", "a replacement", "to repair", "under warranty", "the receipt", "proof of purchase", "it stopped working", "to charge", "faulty", "how long will it take"],
+  "closing": "Give them a reference number, say when they will hear back, and apologise for the trouble",
+  "successCriteria": [
+    "The learner offered proof of purchase when the receipt came up",
+    "They said clearly what outcome they wanted",
+    "They left knowing what happens next"
+  ],
+  "suggestedLevel": "B1"
+}

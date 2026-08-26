@@ -1,0 +1,32 @@
+{
+  "slug": "job-interview",
+  "title": "Job interview",
+  "source": "library",
+  "summary": "Answer the hard questions in a first-round interview.",
+  "setting": "A meeting room, first-round interview for a job the learner actually wants",
+  "agentRole": {
+    "name": "the hiring manager",
+    "role": "a hiring manager running a first-round interview",
+    "persona": "Friendly but genuinely probing. Follows up on vague answers with 'such as?' rather than moving on. Does not rescue the learner from a silence."
+  },
+  "userRole": {
+    "role": "a candidate interviewing for a role in their own field",
+    "goal": "Introduce themselves, give a concrete example of past work, handle a weakness question, and ask something back"
+  },
+  "beats": [
+    { "id": "introduction", "intent": "Get the learner to introduce themselves and their background in under a minute", "successCriteria": "A coherent self-introduction was given" },
+    { "id": "why-us", "intent": "Ask why this company and push back once if the answer is generic", "successCriteria": "A specific reason was given" },
+    { "id": "example", "intent": "Ask for a concrete example of something they built or fixed", "successCriteria": "One real example with a detail in it" },
+    { "id": "weakness", "intent": "Ask what they find difficult, and do not accept a humblebrag", "successCriteria": "An honest answer with what they do about it" },
+    { "id": "their-questions", "intent": "Invite questions and answer one properly", "successCriteria": "The learner asked at least one real question" },
+    { "id": "next-steps", "intent": "Explain next steps and get the learner to confirm availability", "successCriteria": "They confirmed when they are available" }
+  ],
+  "vocabularyConcepts": ["experience", "responsible for", "to lead a team", "a challenge", "notice period", "salary expectations", "strengths", "to improve", "next steps", "to apply for"],
+  "closing": "Thank them for their time, say when they will hear back, and see them out",
+  "successCriteria": [
+    "The learner gave one specific example rather than generalities",
+    "They answered the weakness question honestly",
+    "They asked a question of their own"
+  ],
+  "suggestedLevel": "B2"
+}

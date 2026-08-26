@@ -1,0 +1,8 @@
+{
+  "agents": [
+    {
+      "name": "CallMode role-play tutor",
+      "config": "agent/agent_configs/roleplay-tutor.json"
+    }
+  ]
+}

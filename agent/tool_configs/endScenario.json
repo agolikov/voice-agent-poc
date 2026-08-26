@@ -1,0 +1,23 @@
+{
+  "name": "endScenario",
+  "description": "Close the session. Call this once, after the closing line, when the scene is over or time has run out.",
+  "type": "client",
+  "expects_response": false,
+  "response_timeout_secs": 10,
+  "parameters": {
+    "type": "object",
+    "description": "How the scene ended",
+    "properties": {
+      "outcome": {
+        "type": "string",
+        "description": "One of: 'goal-achieved', 'partial', 'abandoned', 'out-of-time'."
+      },
+      "summary": {
+        "type": "string",
+        "description": "One sentence on how the learner did, in the learner's native language."
+      }
+    },
+    "required": ["outcome", "summary"]
+  },
+  "dynamic_variables": { "dynamic_variable_placeholders": {} }
+}
