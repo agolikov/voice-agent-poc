@@ -1,8 +1,11 @@
 "use client";
 
+import { useI18n } from "~/components/i18n-provider";
+
 const storageKey = "callmode-theme";
 
 export const ThemeToggle = () => {
+  const { t } = useI18n();
   const toggle = () => {
     const root = document.documentElement;
     const next = root.dataset.theme === "dark" ? "light" : "dark";
@@ -15,15 +18,15 @@ export const ThemeToggle = () => {
     <button
       type="button"
       onClick={toggle}
-      className="fixed top-4 right-4 z-40 rounded-full border border-rule bg-card/90 px-3 py-1.5 text-xs font-medium text-ink shadow-sm backdrop-blur transition hover:border-accent"
-      aria-label="Toggle color theme"
-      title="Toggle color theme"
+      className="rounded-full border border-rule bg-card/90 px-3 py-1.5 text-xs font-medium text-ink shadow-sm backdrop-blur transition hover:border-accent"
+      aria-label={t("toggleTheme")}
+      title={t("toggleTheme")}
     >
       <span className="theme-light-action" aria-hidden="true">
-        ☀ Light mode
+        ☀ {t("lightMode")}
       </span>
       <span className="theme-dark-action" aria-hidden="true">
-        ◐ Dark mode
+        ◐ {t("darkMode")}
       </span>
     </button>
   );

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { BeatTracker } from "~/components/call/beat-tracker";
+import { useI18n } from "~/components/i18n-provider";
 import { HintCard } from "~/components/call/hint-card";
 import { Transcript } from "~/components/call/transcript";
 import { Button, Card } from "~/components/ui";
@@ -14,6 +15,7 @@ import { usePracticeSession } from "~/lib/voice/use-practice-session";
 type Props = { scenario: Scenario; settings: SessionSettings };
 
 export const CallStage = ({ scenario, settings }: Props) => {
+  const { locale, t } = useI18n();
   const router = useRouter();
   const session = usePracticeSession(scenario, settings);
   const { status, sessionId } = session;
@@ -27,6 +29,10 @@ export const CallStage = ({ scenario, settings }: Props) => {
   }, [status, sessionId, router]);
 
   const isLive = status === "live";
+  const statusLabel = {
+    idle: t("statusIdle"), preparing: t("statusPreparing"), connecting: t("statusConnecting"),
+    live: t("yourTurn"), ended: t("statusEnded"), error: t("statusError"),
+  }[status];
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
@@ -46,23 +52,23 @@ export const CallStage = ({ scenario, settings }: Props) => {
                   : "border border-rule text-ink-soft"
               }`}
             >
-              {isLive ? (session.isSpeaking ? "they are speaking" : "your turn") : status}
+              {isLive ? (session.isSpeaking ? t("theySpeaking") : t("yourTurn")) : statusLabel}
             </span>
           </div>
 
           <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-xs tracking-wide text-ink-soft uppercase">You are</dt>
+              <dt className="text-xs tracking-wide text-ink-soft uppercase">{t("youAre")}</dt>
               <dd className="mt-0.5 text-ink">{scenario.userRole.role}</dd>
             </div>
             <div>
-              <dt className="text-xs tracking-wide text-ink-soft uppercase">They are</dt>
+              <dt className="text-xs tracking-wide text-ink-soft uppercase">{t("theyAre")}</dt>
               <dd className="mt-0.5 text-ink">
                 {scenario.agentRole.name} — {scenario.agentRole.role}
               </dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-xs tracking-wide text-ink-soft uppercase">What you want</dt>
+              <dt className="text-xs tracking-wide text-ink-soft uppercase">{t("whatYouWant")}</dt>
               <dd className="mt-0.5 text-ink">{scenario.userRole.goal}</dd>
             </div>
           </dl>
@@ -70,7 +76,7 @@ export const CallStage = ({ scenario, settings }: Props) => {
           <div className="mt-5">
             <BeatTracker beats={scenario.beats} current={session.beatIndex} />
             <p className="mt-2 text-xs text-ink-soft">
-              Beat {session.beatIndex + 1} of {scenario.beats.length}
+              {t("beatProgress", { current: session.beatIndex + 1, total: scenario.beats.length })}
               {session.beat ? ` — ${session.beat.intent}` : ""}
             </p>
           </div>
@@ -80,19 +86,18 @@ export const CallStage = ({ scenario, settings }: Props) => {
 
         {status === "idle" ? (
           <Card className="p-5">
-            <h2 className="font-serif text-base text-ink">Before you start</h2>
+            <h2 className="font-serif text-base text-ink">{t("beforeStart")}</h2>
             <ul className="mt-2 space-y-1.5 text-sm text-ink-soft">
               <li>
-                They will speak {new Intl.DisplayNames(["en"], { type: "language" }).of(scenario.targetLanguage) ?? scenario.targetLanguage} and expect you to as well.
+                {t("spokenLanguage", { language: new Intl.DisplayNames([locale], { type: "language" }).of(scenario.targetLanguage) ?? scenario.targetLanguage })}
               </li>
               <li>
-                Stuck? Press <kbd className="rounded border border-rule px-1">H</kbd>, hit the Help
-                button, or say &ldquo;{settings.helpTrigger}&rdquo; — then repeat what you hear.
+                {t("helpInstruction", { trigger: settings.helpTrigger })}
               </li>
-              <li>The call ends itself after {settings.maxDurationMinutes} minutes.</li>
+              <li>{t("callEnds", { minutes: settings.maxDurationMinutes })}</li>
             </ul>
             <Button className="mt-4" onClick={() => void session.start()}>
-              Start the call
+              {t("startCall")}
             </Button>
           </Card>
         ) : null}
@@ -104,16 +109,16 @@ export const CallStage = ({ scenario, settings }: Props) => {
         {isLive || status === "connecting" || status === "preparing" ? (
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={session.askForHelp} disabled={!isLive} variant="ghost">
-              Help me say this (H)
+              {t("helpMe")}
             </Button>
             <Button onClick={() => session.setMuted(!session.isMuted)} disabled={!isLive} variant="ghost">
-              {session.isMuted ? "Unmute" : "Mute"}
+              {session.isMuted ? t("unmute") : t("mute")}
             </Button>
             <Button onClick={session.stop} variant="danger">
-              End the call
+              {t("endCall")}
             </Button>
             <span className="text-xs text-ink-soft">
-              {session.hintCount} hint{session.hintCount === 1 ? "" : "s"} used
+              {t("hintsUsed", { count: session.hintCount })}
             </span>
           </div>
         ) : null}
@@ -121,13 +126,13 @@ export const CallStage = ({ scenario, settings }: Props) => {
 
       <div className="space-y-4">
         <Card className="p-5">
-          <h2 className="mb-3 font-serif text-base text-ink">Transcript</h2>
+          <h2 className="mb-3 font-serif text-base text-ink">{t("transcript")}</h2>
           <Transcript entries={session.transcript} live />
         </Card>
 
         {scenario.vocabulary.length > 0 ? (
           <Card className="p-5">
-            <h2 className="mb-3 font-serif text-base text-ink">Words for this scene</h2>
+            <h2 className="mb-3 font-serif text-base text-ink">{t("sceneWords")}</h2>
             <dl className="space-y-1.5 text-sm">
               {scenario.vocabulary.map((entry) => (
                 <div key={entry.term} className="flex justify-between gap-3">

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { useI18n } from "~/components/i18n-provider";
 import { Button } from "~/components/ui";
 
 type Service = "ai" | "elevenlabs";
@@ -21,6 +22,7 @@ const initialState: Record<Service, CheckState> = {
 };
 
 export const ConnectionChecks = () => {
+  const { t } = useI18n();
   const [checks, setChecks] = useState(initialState);
 
   const check = async (service: Service) => {
@@ -60,10 +62,10 @@ export const ConnectionChecks = () => {
     <section className="mt-5 border-t border-rule pt-4" aria-labelledby="connection-checks-title">
       <div>
         <h3 id="connection-checks-title" className="text-sm font-medium text-ink">
-          Connections
+          {t("connections")}
         </h3>
         <p className="mt-1 text-xs text-ink-soft">
-          If setting the scene stalls, test each upstream service independently.
+          {t("connectionsHint")}
         </p>
       </div>
 
@@ -79,8 +81,8 @@ export const ConnectionChecks = () => {
                 onClick={() => void check(service)}
               >
                 {state.status === "checking"
-                  ? `Checking ${labels[service]}…`
-                  : `Check ${labels[service]} connection`}
+                  ? t("checkingConnection", { service: labels[service] })
+                  : t("checkConnection", { service: labels[service] })}
               </Button>
               {state.status === "success" || state.status === "error" ? (
                 <p

@@ -1,4 +1,5 @@
 import type { ScenarioTemplate } from "~/lib/scenario/schema";
+import type { UiLocale } from "~/lib/i18n/locale";
 import type { SessionSettings } from "~/lib/session/settings";
 import { beatCountRange } from "~/lib/session/settings";
 
@@ -80,7 +81,13 @@ Produce, in ${target} unless stated otherwise:
  * the situation; realization then gives it a language, exactly as it does for a
  * curated one.
  */
-export const TEMPLATE_SYSTEM_PROMPT = `You design role-play situations for language learners.
+const authoringLanguage: Record<UiLocale, string> = {
+  en: "English",
+  pl: "Polish",
+  ru: "Russian",
+};
+
+export const templateSystemPrompt = (uiLocale: UiLocale) => `You design role-play situations for language learners.
 
 Given a learner's description of what they want to practise, design the scene.
 
@@ -92,12 +99,19 @@ What makes these work:
   correcting, negotiating, closing.
 - The character never fills the learner's silences. Say so in the persona.
 
-Write the template in English. It is authoring material, not dialogue — the
-target-language lines are written in a later step.`;
+Write all user-visible authoring fields in ${authoringLanguage[uiLocale]}. It is
+authoring material, not dialogue — target-language lines are written later.
+Beat ids must still be short ASCII kebab-case identifiers.`;
 
-export const buildTemplatePrompt = (description: string, settings: SessionSettings): string => {
+export const buildTemplatePrompt = (
+  description: string,
+  settings: SessionSettings,
+  uiLocale: UiLocale = "en",
+): string => {
   const { min, max } = beatCountRange[settings.beatCount];
   return `The learner wants to practise: "${description}"
+
+User interface language: ${authoringLanguage[uiLocale]}.
 
 Their level is ${settings.cefrLevel}. Design a scene with between ${min} and ${max} beats.
 

@@ -2,19 +2,13 @@
 
 import type { ActiveHint } from "~/lib/voice/types";
 import type { HintMode } from "~/lib/session/settings";
+import { useI18n } from "~/components/i18n-provider";
 
 const outcomeStyles = {
   awaiting: "border-warn bg-warn-soft",
   repeated: "border-accent bg-accent-soft",
   partial: "border-warn bg-warn-soft",
   missed: "border-flag bg-flag-soft",
-} as const;
-
-const outcomeLabels = {
-  awaiting: "Say this out loud",
-  repeated: "Got it",
-  partial: "Close — listen again",
-  missed: "Moving on. This one is in your debrief.",
 } as const;
 
 type Props = { hint: ActiveHint | null; hintMode: HintMode };
@@ -27,7 +21,14 @@ type Props = { hint: ActiveHint | null; hintMode: HintMode };
  * putting it on screen would quietly undo the immersion the setting asked for.
  */
 export const HintCard = ({ hint, hintMode }: Props) => {
+  const { t } = useI18n();
   if (!hint) return null;
+  const outcomeLabels = {
+    awaiting: t("sayOutLoud"),
+    repeated: t("gotIt"),
+    partial: t("closeListen"),
+    missed: t("movingOn"),
+  } as const;
 
   return (
     <div className={`rounded-xl border-2 p-5 ${outcomeStyles[hint.outcome]}`}>

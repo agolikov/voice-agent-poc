@@ -22,10 +22,15 @@ export const languages = [
   { value: "en", label: "English", flag: "🇬🇧" },
 ] as const;
 
-export const languageLabel = (value: string) =>
-  languages.find((language) => language.value === value)?.label ?? value;
+export const languageLabel = (value: string, locale = "en") => {
+  try {
+    return new Intl.DisplayNames([locale], { type: "language" }).of(value) ?? value;
+  } catch {
+    return languages.find((language) => language.value === value)?.label ?? value;
+  }
+};
 
-export const languageOptions = languages.map((language) => ({
+export const languageOptions = (locale = "en") => languages.map((language) => ({
   value: language.value,
-  label: `${language.flag}  ${language.label}`,
+  label: `${language.flag}  ${languageLabel(language.value, locale)}`,
 }));

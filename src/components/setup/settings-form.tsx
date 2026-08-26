@@ -1,6 +1,7 @@
 "use client";
 
 import { ConnectionChecks } from "~/components/setup/connection-checks";
+import { useI18n } from "~/components/i18n-provider";
 import { Card, fieldClass, Label, Select } from "~/components/ui";
 import {
   correctionStyles,
@@ -12,42 +13,34 @@ import {
   type SessionSettings,
 } from "~/lib/session/settings";
 
-const hintModeLabels: Record<(typeof hintModes)[number], string> = {
-  "target-only": "Target language only",
-  "target-plus-translation": "Target language, translation on screen",
-  "native-cue-first": "A cue in your language first",
-};
-
-const hintModeHints: Record<(typeof hintModes)[number], string> = {
-  "target-only": "Full immersion. You hear and repeat the line, nothing else.",
-  "target-plus-translation": "You hear only the target language, but you can see what it means.",
-  "native-cue-first": "Most supportive. One sentence of your language, then the line.",
-};
-
-const repeatPolicyLabels: Record<(typeof repeatPolicies)[number], string> = {
-  "two-tries": "Two tries, then move on",
-  "hard-gate": "Stay on it until it is right",
-  "one-try": "One try, always move on",
-};
-
-const repeatPolicyHints: Record<(typeof repeatPolicies)[number], string> = {
-  "two-tries": "A missed line is logged for the debrief and the scene carries on.",
-  "hard-gate": "Most drill value, but a misheard word can strand you on one line.",
-  "one-try": "Lowest friction. Mistakes surface only at the end.",
-};
-
-const toleranceLabels: Record<(typeof repeatTolerances)[number], string> = {
-  strict: "Strict — near-verbatim",
-  normal: "Normal — every content word",
-  lenient: "Lenient — the same meaning",
-};
-
 type Props = {
   settings: SessionSettings;
   onChange: (settings: SessionSettings) => void;
 };
 
 export const SettingsForm = ({ settings, onChange }: Props) => {
+  const { t } = useI18n();
+  const hintModeLabels = {
+    "target-only": t("targetOnly"),
+    "target-plus-translation": t("targetTranslation"),
+    "native-cue-first": t("nativeCue"),
+  } as const;
+  const hintModeHints = {
+    "target-only": t("targetOnlyHint"),
+    "target-plus-translation": t("targetTranslationHint"),
+    "native-cue-first": t("nativeCueHint"),
+  } as const;
+  const repeatPolicyLabels = {
+    "two-tries": t("twoTries"),
+    "hard-gate": t("hardGate"),
+    "one-try": t("oneTry"),
+  } as const;
+  const repeatPolicyHints = {
+    "two-tries": t("twoTriesHint"),
+    "hard-gate": t("hardGateHint"),
+    "one-try": t("oneTryHint"),
+  } as const;
+  const toleranceLabels = { strict: t("strict"), normal: t("normal"), lenient: t("lenient") } as const;
   const set = <K extends keyof SessionSettings>(key: K, value: SessionSettings[K]) =>
     onChange({ ...settings, [key]: value });
 
@@ -55,32 +48,32 @@ export const SettingsForm = ({ settings, onChange }: Props) => {
     <Card className="p-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <Select
-          label="When you ask for help"
+          label={t("helpMode")}
           value={settings.hintMode}
           options={hintModes.map((mode) => ({ value: mode, label: hintModeLabels[mode] }))}
           onChange={(value) => set("hintMode", value)}
           hint={hintModeHints[settings.hintMode]}
         />
         <Select
-          label="Corrections"
+          label={t("corrections")}
           value={settings.correctionStyle}
           options={[
-            { value: correctionStyles[0], label: "As we go, in character" },
-            { value: correctionStyles[1], label: "Save it all for the debrief" },
+            { value: correctionStyles[0], label: t("correctAsYouGo") },
+            { value: correctionStyles[1], label: t("correctAtEnd") },
           ]}
           onChange={(value) => set("correctionStyle", value)}
         />
         <Select
-          label="Speaking pace"
+          label={t("speakingPace")}
           value={settings.agentSpeechRate}
           options={[
-            { value: speechRates[0], label: "Slower than natural" },
-            { value: speechRates[1], label: "Natural" },
+            { value: speechRates[0], label: t("slower") },
+            { value: speechRates[1], label: t("natural") },
           ]}
           onChange={(value) => set("agentSpeechRate", value)}
         />
         <label className="block">
-          <Label>End the call after</Label>
+          <Label>{t("callLimit")}</Label>
           <div className="flex items-center gap-2">
             <input
               type="number"
@@ -92,10 +85,10 @@ export const SettingsForm = ({ settings, onChange }: Props) => {
                 set("maxDurationMinutes", Math.max(1, Math.min(60, Number(event.target.value) || 1)))
               }
             />
-            <span className="text-sm text-ink-soft">min</span>
+            <span className="text-sm text-ink-soft">{t("minutes")}</span>
           </div>
           <span className="mt-1 block text-xs text-ink-soft">
-            Voice minutes are billed, so this is a spending guard as much as a fatigue one.
+            {t("callLimitHint")}
           </span>
         </label>
       </div>
@@ -106,21 +99,21 @@ export const SettingsForm = ({ settings, onChange }: Props) => {
       <details className="group mt-5 border-t border-rule pt-4">
         <summary className="cursor-pointer list-none text-sm font-medium text-ink-soft transition hover:text-ink">
           <span className="mr-1.5 inline-block transition group-open:rotate-90">›</span>
-          Fine-tune the help loop
+          {t("fineTune")}
         </summary>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Select
-            label="How long the hint is"
+            label={t("hintLength")}
             value={settings.hintLength}
             options={[
-              { value: hintLengths[0], label: "Short — the least that works" },
-              { value: hintLengths[1], label: "A full sentence" },
+              { value: hintLengths[0], label: t("shortHint") },
+              { value: hintLengths[1], label: t("fullSentence") },
             ]}
             onChange={(value) => set("hintLength", value)}
           />
           <Select
-            label="If you cannot repeat it"
+            label={t("repeatFailure")}
             value={settings.repeatPolicy}
             options={repeatPolicies.map((policy) => ({
               value: policy,
@@ -130,7 +123,7 @@ export const SettingsForm = ({ settings, onChange }: Props) => {
             hint={repeatPolicyHints[settings.repeatPolicy]}
           />
           <Select
-            label="How close is close enough"
+            label={t("tolerance")}
             value={settings.repeatTolerance}
             options={repeatTolerances.map((tolerance) => ({
               value: tolerance,
@@ -139,25 +132,23 @@ export const SettingsForm = ({ settings, onChange }: Props) => {
             onChange={(value) => set("repeatTolerance", value)}
           />
           <Select
-            label="May they use your language?"
+            label={t("nativeAllowed")}
             value={settings.allowNativeLanguage ? "yes" : "no"}
             options={[
-              { value: "no", label: "No — full immersion" },
-              { value: "yes", label: "Yes, if I am truly stuck" },
+              { value: "no", label: t("noImmersion") },
+              { value: "yes", label: t("yesStuck") },
             ]}
             onChange={(value) => set("allowNativeLanguage", value === "yes")}
           />
           <label className="block sm:col-span-2">
-            <Label>Say this out loud to ask for help</Label>
+            <Label>{t("helpTrigger")}</Label>
             <input
               className={fieldClass}
               value={settings.helpTrigger}
               onChange={(event) => set("helpTrigger", event.target.value)}
             />
             <span className="mt-1 block text-xs text-ink-soft">
-              Pressing <kbd className="rounded border border-rule px-1">H</kbd> or the button always
-              works and never goes through speech recognition. A single letter makes a poor spoken
-              trigger, so keep this a word.
+              {t("helpTriggerHint")}
             </span>
           </label>
         </div>

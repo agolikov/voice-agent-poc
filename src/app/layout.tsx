@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import "~/app/globals.css";
-import { ThemeToggle } from "~/components/theme-toggle";
+import { GlobalControls } from "~/components/global-controls";
+import { I18nProvider } from "~/components/i18n-provider";
+import { getServerLocale } from "~/lib/i18n/server";
 
 export const metadata: Metadata = {
   title: "CallMode",
   description: "Practise a real conversation in the language you are learning.",
 };
 
-const RootLayout = ({ children }: { children: React.ReactNode }) => (
-  <html lang="en" suppressHydrationWarning>
+const RootLayout = async ({ children }: { children: React.ReactNode }) => {
+  const locale = await getServerLocale();
+  return <html lang={locale} suppressHydrationWarning>
     <head>
       <script
         dangerouslySetInnerHTML={{
@@ -19,16 +21,12 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
       />
     </head>
     <body className="min-h-dvh font-sans antialiased">
-      <Link
-        href="/history"
-        className="fixed top-4 right-36 z-40 rounded-full border border-rule bg-card/90 px-3 py-1.5 text-xs font-medium text-ink shadow-sm backdrop-blur transition hover:border-accent"
-      >
-        Past calls
-      </Link>
-      <ThemeToggle />
-      {children}
+      <I18nProvider locale={locale}>
+        <GlobalControls />
+        {children}
+      </I18nProvider>
     </body>
   </html>
-);
+};
 
 export default RootLayout;

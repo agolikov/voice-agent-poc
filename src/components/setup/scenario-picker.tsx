@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 
+import { useI18n } from "~/components/i18n-provider";
 import { scenarioImages } from "~/components/setup/scenario-images";
 import { Card } from "~/components/ui";
 import type { TemplateSummary } from "~/lib/voice/types";
@@ -15,8 +16,9 @@ type Props = {
 };
 
 export const ScenarioPicker = ({ templates, selected, onSelect, onEdit, loading }: Props) => {
+  const { t } = useI18n();
   if (loading) {
-    return <p className="text-sm text-ink-soft">Loading situations…</p>;
+    return <p className="text-sm text-ink-soft">{t("loadingSituations")}</p>;
   }
 
   return (
@@ -54,26 +56,26 @@ export const ScenarioPicker = ({ templates, selected, onSelect, onEdit, loading 
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-serif text-base text-ink">{template.title}</h3>
                   <span className="shrink-0 text-xs text-ink-soft">
-                    {template.suggestedLevel} · {template.beatCount} beats
+                    {template.suggestedLevel} · {template.beatCount} {t("beats")}
                   </span>
                 </div>
                 <p className="mt-1.5 text-sm text-ink-soft">{template.summary}</p>
                 <p className="mt-2 text-xs text-ink-soft">
-                  <span className="font-medium">You want:</span> {template.userGoal}
+                  <span className="font-medium">{t("youWant")}</span> {template.userGoal}
                 </p>
               </div>
             </button>
             {template.editable ? (
               <div className="flex items-center justify-between border-t border-rule px-4 py-2">
                 <span className="rounded border border-rule px-1.5 py-0.5 text-[10px] tracking-wide text-ink-soft uppercase">
-                  Saved
+                  {t("saved")}
                 </span>
                 <button
                   type="button"
                   onClick={() => onEdit(template.slug)}
                   className="text-xs font-medium text-accent hover:underline"
                 >
-                  Edit situation
+                  {t("editSituation")}
                 </button>
               </div>
             ) : null}
@@ -81,7 +83,7 @@ export const ScenarioPicker = ({ templates, selected, onSelect, onEdit, loading 
         );
       })}
       {templates.length === 0 ? (
-        <Card className="p-4 text-sm text-ink-soft sm:col-span-2">No situations yet.</Card>
+        <Card className="p-4 text-sm text-ink-soft sm:col-span-2">{t("noSituations")}</Card>
       ) : null}
     </div>
   );

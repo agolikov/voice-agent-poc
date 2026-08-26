@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
+import { useI18n } from "~/components/i18n-provider";
 import type { TranscriptEntry } from "~/lib/voice/types";
 
 const timingTone = (milliseconds: number, kind: "agent" | "model") => {
@@ -25,24 +26,29 @@ const TimingBadge = ({
   milliseconds?: number;
   kind: "agent" | "model";
   pending?: boolean;
-}) => (
-  <span
-    className={`inline-flex rounded border px-1.5 py-0.5 text-[10px] font-medium ${
-      milliseconds === undefined
-        ? "border-rule text-ink-soft"
-        : timingTone(milliseconds, kind)
-    }`}
-    title={
-      kind === "agent"
-        ? "Time from the learner transcript to the agent reply"
-        : "ElevenLabs-reported language-model time to first byte"
-    }
-  >
-    {label} {milliseconds === undefined ? (pending ? "pending" : "not reported") : formattedTiming(milliseconds)}
-  </span>
-);
+}) => {
+  const { t } = useI18n();
+  return (
+    <span
+      className={`inline-flex rounded border px-1.5 py-0.5 text-[10px] font-medium ${
+        milliseconds === undefined
+          ? "border-rule text-ink-soft"
+          : timingTone(milliseconds, kind)
+      }`}
+      title={kind === "agent" ? t("agentTimingTitle") : t("modelTimingTitle")}
+    >
+      {label}{" "}
+      {milliseconds === undefined
+        ? pending
+          ? t("pending")
+          : t("notReported")
+        : formattedTiming(milliseconds)}
+    </span>
+  );
+};
 
 export const Transcript = ({ entries, live = false }: { entries: TranscriptEntry[]; live?: boolean }) => {
+  const { t } = useI18n();
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,7 +69,7 @@ export const Transcript = ({ entries, live = false }: { entries: TranscriptEntry
         >
           <p className={entry.role === "agent" ? "text-ink" : "text-ink-soft"}>
             <span className="mr-2 text-[10px] tracking-wide uppercase opacity-60">
-              {entry.role === "agent" ? "them" : "you"}
+              {entry.role === "agent" ? t("them") : t("you")}
             </span>
             {entry.text}
           </p>
@@ -81,9 +87,9 @@ export const Transcript = ({ entries, live = false }: { entries: TranscriptEntry
           ) : null}
           {entry.role === "agent" ? (
             <div className="mt-1.5 flex flex-wrap gap-1.5">
-              <TimingBadge label="Agent" milliseconds={entry.agentResponseMs} kind="agent" />
+              <TimingBadge label={t("agent")} milliseconds={entry.agentResponseMs} kind="agent" />
               <TimingBadge
-                label="Model"
+                label={t("model")}
                 milliseconds={entry.modelResponseMs}
                 kind="model"
                 pending={live && entry.modelResponseMs === undefined}
@@ -94,12 +100,12 @@ export const Transcript = ({ entries, live = false }: { entries: TranscriptEntry
         </div>
       ))}
       {entries.length === 0 ? (
-        <p className="text-sm text-ink-soft">The conversation will appear here.</p>
+        <p className="text-sm text-ink-soft">{t("transcriptEmpty")}</p>
       ) : null}
       <div ref={endRef} />
       {entries.some((entry) => entry.role === "agent") ? (
         <p className="pt-1 text-[10px] text-ink-soft">
-          Speed: <span className="text-accent">green</span> is fast, <span className="text-warn">yellow</span> is acceptable, <span className="text-flag">red</span> is slow. Model TTFB is filled from completed-call data.
+          {t("speedLegend")}
         </p>
       ) : null}
     </div>

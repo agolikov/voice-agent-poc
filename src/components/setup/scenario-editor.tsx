@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { useI18n } from "~/components/i18n-provider";
 import { Button, Card, fieldClass, Label, Select } from "~/components/ui";
 import { cefrLevels, type ScenarioTemplate } from "~/lib/scenario/schema";
 
@@ -50,6 +51,7 @@ const TextField = ({
 );
 
 export const ScenarioEditor = ({ slug, onCancel, onSaved }: Props) => {
+  const { t } = useI18n();
   const [template, setTemplate] = useState<ScenarioTemplate | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,19 +68,19 @@ export const ScenarioEditor = ({ slug, onCancel, onSaved }: Props) => {
         });
         const body = (await response.json()) as { template?: ScenarioTemplate; error?: string };
         if (!response.ok || !body.template) {
-          throw new Error(body.error ?? "Could not load that situation.");
+          throw new Error(body.error ?? t("couldNotLoad"));
         }
         setTemplate(body.template);
       } catch (thrown) {
         if (thrown instanceof DOMException && thrown.name === "AbortError") return;
-        setError(thrown instanceof Error ? thrown.message : "Could not load that situation.");
+        setError(thrown instanceof Error ? thrown.message : t("couldNotLoad"));
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
     };
     void load();
     return () => controller.abort();
-  }, [slug]);
+  }, [slug, t]);
 
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {
@@ -105,11 +107,11 @@ export const ScenarioEditor = ({ slug, onCancel, onSaved }: Props) => {
       });
       const body = (await response.json()) as { template?: ScenarioTemplate; error?: string };
       if (!response.ok || !body.template) {
-        throw new Error(body.error ?? "Could not save that situation.");
+        throw new Error(body.error ?? t("couldNotSave"));
       }
       onSaved(body.template);
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : "Could not save that situation.");
+      setError(thrown instanceof Error ? thrown.message : t("couldNotSave"));
       setSaving(false);
     }
   };
@@ -128,72 +130,72 @@ export const ScenarioEditor = ({ slug, onCancel, onSaved }: Props) => {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 id="scenario-editor-title" className="font-serif text-xl text-ink">
-              Edit saved situation
+              {t("editSaved")}
             </h2>
             <p className="mt-1 text-sm text-ink-soft">
-              Changes are stored in the database and used the next time you prepare this scene.
+              {t("editSavedHint")}
             </p>
           </div>
           <button
             type="button"
             onClick={onCancel}
             className="rounded-md px-2 py-1 text-xl leading-none text-ink-soft hover:bg-accent-soft hover:text-ink"
-            aria-label="Close editor"
+            aria-label={t("closeEditor")}
           >
             ×
           </button>
         </div>
 
-        {loading ? <p className="mt-6 text-sm text-ink-soft">Loading saved situation…</p> : null}
+        {loading ? <p className="mt-6 text-sm text-ink-soft">{t("loadingSaved")}</p> : null}
 
         {template ? (
           <div className="mt-6 grid gap-5">
             <div className="grid gap-4 sm:grid-cols-2">
-              <TextField label="Title" value={template.title} onChange={(title) => patch({ title })} />
+              <TextField label={t("titleLabel")} value={template.title} onChange={(title) => patch({ title })} />
               <Select
-                label="Suggested level"
+                label={t("suggestedLevel")}
                 value={template.suggestedLevel}
                 options={cefrLevels.map((level) => ({ value: level, label: level }))}
                 onChange={(suggestedLevel) => patch({ suggestedLevel })}
               />
             </div>
             <TextField
-              label="Picker summary"
+              label={t("pickerSummary")}
               value={template.summary}
               onChange={(summary) => patch({ summary })}
               multiline
             />
             <TextField
-              label="Setting"
+              label={t("settingLabel")}
               value={template.setting}
               onChange={(setting) => patch({ setting })}
             />
 
             <div className="grid gap-4 border-t border-rule pt-5 sm:grid-cols-2">
               <TextField
-                label="Other person’s role"
+                label={t("otherRole")}
                 value={template.agentRole.role}
                 onChange={(role) => patch({ agentRole: { ...template.agentRole, role } })}
               />
               <TextField
-                label="Other person’s name"
+                label={t("otherName")}
                 value={template.agentRole.name}
                 onChange={(name) => patch({ agentRole: { ...template.agentRole, name } })}
               />
               <TextField
-                label="Their personality"
+                label={t("theirPersonality")}
                 value={template.agentRole.persona}
                 onChange={(persona) => patch({ agentRole: { ...template.agentRole, persona } })}
                 multiline
               />
               <div className="grid gap-4">
                 <TextField
-                  label="Your role"
+                  label={t("yourRole")}
                   value={template.userRole.role}
                   onChange={(role) => patch({ userRole: { ...template.userRole, role } })}
                 />
                 <TextField
-                  label="Your goal"
+                  label={t("yourGoal")}
                   value={template.userRole.goal}
                   onChange={(goal) => patch({ userRole: { ...template.userRole, goal } })}
                 />
@@ -204,10 +206,10 @@ export const ScenarioEditor = ({ slug, onCancel, onSaved }: Props) => {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h3 id="editor-beats-title" className="font-serif text-lg text-ink">
-                    Conversation beats
+                    {t("conversationBeats")}
                   </h3>
                   <p className="mt-1 text-xs text-ink-soft">
-                    Each beat is one thing you should manage during the practice call.
+                    {t("conversationBeatsHint")}
                   </p>
                 </div>
                 <Button
@@ -219,14 +221,14 @@ export const ScenarioEditor = ({ slug, onCancel, onSaved }: Props) => {
                         ...template.beats,
                         {
                           id: `beat-${crypto.randomUUID()}`,
-                          intent: "New conversation beat",
-                          successCriteria: "The learner handles this part of the conversation",
+                          intent: t("whatHappens"),
+                          successCriteria: t("successCriteria"),
                         },
                       ],
                     })
                   }
                 >
-                  Add beat
+                  {t("addBeat")}
                 </Button>
               </div>
 
@@ -235,7 +237,7 @@ export const ScenarioEditor = ({ slug, onCancel, onSaved }: Props) => {
                   <div key={beat.id} className="rounded-lg border border-rule bg-paper p-4">
                     <div className="mb-3 flex items-center justify-between">
                       <span className="text-xs font-medium tracking-wide text-ink-soft uppercase">
-                        Beat {index + 1}
+                        {t("beatLabel", { number: index + 1 })}
                       </span>
                       {template.beats.length > 1 ? (
                         <button
@@ -245,13 +247,13 @@ export const ScenarioEditor = ({ slug, onCancel, onSaved }: Props) => {
                             patch({ beats: template.beats.filter((candidate) => candidate.id !== beat.id) })
                           }
                         >
-                          Remove
+                          {t("remove")}
                         </button>
                       ) : null}
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <TextField
-                        label="What happens"
+                        label={t("whatHappens")}
                         value={beat.intent}
                         onChange={(intent) =>
                           patch({
@@ -262,7 +264,7 @@ export const ScenarioEditor = ({ slug, onCancel, onSaved }: Props) => {
                         }
                       />
                       <TextField
-                        label="Done when"
+                        label={t("doneWhen")}
                         value={beat.successCriteria}
                         onChange={(successCriteria) =>
                           patch({
@@ -282,22 +284,22 @@ export const ScenarioEditor = ({ slug, onCancel, onSaved }: Props) => {
 
             <div className="grid gap-4 border-t border-rule pt-5 sm:grid-cols-2">
               <TextField
-                label="Vocabulary concepts"
+                label={t("vocabularyConcepts")}
                 value={template.vocabularyConcepts.join("\n")}
                 onChange={(value) => patch({ vocabularyConcepts: lines(value) })}
                 multiline
-                hint="One concept per line."
+                hint={t("onePerLine")}
               />
               <TextField
-                label="Success criteria"
+                label={t("successCriteria")}
                 value={template.successCriteria.join("\n")}
                 onChange={(value) => patch({ successCriteria: lines(value) })}
                 multiline
-                hint="One criterion per line."
+                hint={t("onePerLine")}
               />
             </div>
             <TextField
-              label="How the scene closes"
+              label={t("howCloses")}
               value={template.closing}
               onChange={(closing) => patch({ closing })}
             />
@@ -308,10 +310,10 @@ export const ScenarioEditor = ({ slug, onCancel, onSaved }: Props) => {
 
         <div className="mt-6 flex justify-end gap-3 border-t border-rule pt-5">
           <Button variant="ghost" onClick={onCancel}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button onClick={save} disabled={!template || saving}>
-            {saving ? "Saving…" : "Save changes"}
+            {saving ? t("saving") : t("saveChanges")}
           </Button>
         </div>
       </Card>

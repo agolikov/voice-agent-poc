@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Intro } from "~/components/setup/intro";
+import { useI18n } from "~/components/i18n-provider";
 import { LanguageForm } from "~/components/setup/language-form";
 import { languageLabel } from "~/components/setup/languages";
 import { ScenarioComposer } from "~/components/setup/scenario-composer";
@@ -17,33 +18,15 @@ import { loadSettings, saveSettings } from "~/lib/session/store";
 import { defaultSessionSettings, type SessionSettings } from "~/lib/session/settings";
 import type { TemplateSummary } from "~/lib/voice/types";
 
-const steps = [
-  {
-    label: "What this is",
-    title: "Practise a real conversation, out loud",
-    blurb:
-      "CallMode gives you the other person: a voice agent that plays the pharmacist, the hiring manager, the landlord — and waits for you to speak.",
-  },
-  {
-    label: "Language",
-    title: "What are you learning?",
-    blurb: "This decides the language of the scene and how hard the lines you have to say will be.",
-  },
-  {
-    label: "Situation",
-    title: "What do you want to practise?",
-    blurb: "Pick one of these, or describe a situation of your own and it gets written for you.",
-  },
-  {
-    label: "How it runs",
-    title: "How much help do you want?",
-    blurb:
-      "Everything here is per run. Change any of it and the same situation plays differently next time.",
-  },
-] as const;
-
 const SetupPage = () => {
+  const { locale, t } = useI18n();
   const router = useRouter();
+  const steps = [
+    { label: t("stepIntro"), title: t("introTitle"), blurb: t("introBlurb") },
+    { label: t("stepLanguage"), title: t("languageTitle"), blurb: t("languageBlurb") },
+    { label: t("stepSituation"), title: t("situationTitle"), blurb: t("situationBlurb") },
+    { label: t("stepSettings"), title: t("settingsTitle"), blurb: t("settingsBlurb") },
+  ];
   const [step, setStep] = useState(0);
   const [furthest, setFurthest] = useState(0);
   const [settings, setSettings] = useState<SessionSettings>(defaultSessionSettings);
@@ -95,11 +78,11 @@ const SetupPage = () => {
       });
       const body = (await response.json()) as { scenario?: Scenario; error?: string };
       if (!response.ok || !body.scenario) {
-        throw new Error(body.error ?? "Could not prepare that situation.");
+        throw new Error(body.error ?? t("somethingWrong"));
       }
       router.push(`/practice/${body.scenario.id}`);
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : "Something went wrong.");
+      setError(thrown instanceof Error ? thrown.message : t("somethingWrong"));
       setPreparing(false);
     }
   };
@@ -110,8 +93,8 @@ const SetupPage = () => {
   const blocked = step === 2 && !selected;
 
   const summary = [
-    step > 0 ? `${languageLabel(settings.targetLanguage)} · ${settings.cefrLevel}` : null,
-    step > 1 ? (selectedTitle ?? (selected ? "Your situation" : "No situation yet")) : null,
+    step > 0 ? `${languageLabel(settings.targetLanguage, locale)} · ${settings.cefrLevel}` : null,
+    step > 1 ? (selectedTitle ?? (selected ? t("yourSituation") : t("noSituation"))) : null,
   ].filter(Boolean) as string[];
 
   return (
@@ -177,7 +160,7 @@ const SetupPage = () => {
           <div className="min-w-0">
             {step > 0 ? (
               <Button onClick={() => goTo(step - 1)} variant="ghost">
-                Back
+                {t("back")}
               </Button>
             ) : null}
           </div>
@@ -190,18 +173,18 @@ const SetupPage = () => {
             ) : null}
             {isLast ? (
               <Button onClick={begin} disabled={!selected || preparing}>
-                {preparing ? "Setting the scene…" : "Start"}
+                {preparing ? t("settingScene") : t("start")}
               </Button>
             ) : (
               <Button onClick={() => goTo(step + 1)} disabled={blocked}>
-                {step === 0 ? "Get started" : "Next"}
+                {step === 0 ? t("getStarted") : t("next")}
               </Button>
             )}
           </div>
         </div>
 
         {blocked ? (
-          <p className="mt-2 text-right text-xs text-ink-soft">Pick a situation to carry on.</p>
+          <p className="mt-2 text-right text-xs text-ink-soft">{t("pickSituation")}</p>
         ) : null}
         {error ? <Card className="mt-3 border-flag p-3 text-sm text-flag">{error}</Card> : null}
       </div>

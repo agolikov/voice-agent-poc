@@ -3,11 +3,12 @@ import { createHash, randomUUID } from "node:crypto";
 import { generateObject } from "ai";
 
 import { getModel } from "~/lib/scenario/provider";
+import type { UiLocale } from "~/lib/i18n/locale";
 import {
   buildRealizationPrompt,
   buildTemplatePrompt,
   REALIZATION_SYSTEM_PROMPT,
-  TEMPLATE_SYSTEM_PROMPT,
+  templateSystemPrompt,
 } from "~/lib/scenario/prompt";
 import {
   normalizeBeats,
@@ -51,17 +52,21 @@ const slugify = (text: string): string =>
 export const generateTemplate = async (
   description: string,
   settings: SessionSettings,
+  uiLocale: UiLocale = "en",
 ): Promise<ScenarioTemplate> => {
   const { object } = await generateObject({
     model: getModel(),
     schema: scenarioTemplateSchema.omit({ slug: true, source: true }),
-    system: TEMPLATE_SYSTEM_PROMPT,
-    prompt: buildTemplatePrompt(description, settings),
+    system: templateSystemPrompt(uiLocale),
+    prompt: buildTemplatePrompt(description, settings, uiLocale),
   });
 
   return scenarioTemplateSchema.parse({
     ...object,
-    slug: slugify(object.title),
+    slug: (() => {
+      const slug = slugify(object.title);
+      return slug === "situation" ? `situation-${randomUUID().slice(0, 8)}` : slug;
+    })(),
     source: "generated",
   });
 };
