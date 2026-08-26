@@ -1,0 +1,40 @@
+{
+    "tools": [
+        {
+            "type": "client",
+            "config": "agent/tool_configs/advanceBeat.json",
+            "name": "advanceBeat",
+            "id": "tool_0101m0ytxmvwfb6tevw9m8r3rpvt"
+        },
+        {
+            "type": "client",
+            "config": "agent/tool_configs/changeSituation.json",
+            "name": "changeSituation",
+            "id": "tool_0701m0ytxn1pfyzajhxsgj63fd2s"
+        },
+        {
+            "type": "client",
+            "config": "agent/tool_configs/endScenario.json",
+            "name": "endScenario",
+            "id": "tool_2601m0ytxn76fb3vtfr2qh08v421"
+        },
+        {
+            "type": "client",
+            "config": "agent/tool_configs/logMistake.json",
+            "name": "logMistake",
+            "id": "tool_8701m0ytxncker6ak1gj26bsj9dh"
+        },
+        {
+            "type": "client",
+            "config": "agent/tool_configs/recordAttempt.json",
+            "name": "recordAttempt",
+            "id": "tool_5901m0ytxnj1enabv3x3nvy1ebzj"
+        },
+        {
+            "type": "client",
+            "config": "agent/tool_configs/showHint.json",
+            "name": "showHint",
+            "id": "tool_1301m0ytxnqbewjbwhbsr5fbg09t"
+        }
+    ]
+}
