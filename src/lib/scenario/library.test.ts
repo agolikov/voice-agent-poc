@@ -1,5 +1,9 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
+import { scenarioImages } from "~/components/setup/scenario-images";
 import { loadTemplates } from "~/lib/scenario/library";
 
 describe("curated template library", () => {
@@ -30,6 +34,18 @@ describe("curated template library", () => {
   it("gives every template vocabulary to boost in ASR", () => {
     for (const template of templates) {
       expect(template.vocabularyConcepts.length, template.slug).toBeGreaterThan(0);
+    }
+  });
+
+  it("gives every predefined situation a local thumbnail", () => {
+    for (const template of templates) {
+      const image = scenarioImages[template.slug];
+      expect(image, template.slug).toBeDefined();
+      expect(
+        existsSync(join(process.cwd(), "public", image!.src.replace(/^\//, ""))),
+        image!.src,
+      ).toBe(true);
+      expect(image!.alt.length, template.slug).toBeGreaterThan(10);
     }
   });
 });

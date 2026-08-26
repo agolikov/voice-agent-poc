@@ -1,5 +1,8 @@
 "use client";
 
+import Image from "next/image";
+
+import { scenarioImages } from "~/components/setup/scenario-images";
 import { Card } from "~/components/ui";
 import type { TemplateSummary } from "~/lib/voice/types";
 
@@ -18,8 +21,9 @@ export const ScenarioPicker = ({ templates, selected, onSelect, onEdit, loading 
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      {templates.map((template) => {
+      {templates.map((template, index) => {
         const isSelected = template.slug === selected;
+        const image = template.source === "library" ? scenarioImages[template.slug] : undefined;
         return (
           <div
             key={template.slug}
@@ -32,19 +36,32 @@ export const ScenarioPicker = ({ templates, selected, onSelect, onEdit, loading 
             <button
               type="button"
               onClick={() => onSelect(template.slug)}
-              className="block w-full p-4 text-left"
+              className="block w-full text-left"
               aria-pressed={isSelected}
             >
-              <div className="flex items-baseline justify-between gap-3">
-                <h3 className="font-serif text-base text-ink">{template.title}</h3>
-                <span className="shrink-0 text-xs text-ink-soft">
-                  {template.suggestedLevel} · {template.beatCount} beats
-                </span>
+              {image ? (
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  width={768}
+                  height={512}
+                  sizes="(min-width: 640px) 448px, 100vw"
+                  loading={index < 2 ? "eager" : "lazy"}
+                  className="aspect-3/2 w-full border-b border-rule object-cover"
+                />
+              ) : null}
+              <div className="p-4">
+                <div className="flex items-baseline justify-between gap-3">
+                  <h3 className="font-serif text-base text-ink">{template.title}</h3>
+                  <span className="shrink-0 text-xs text-ink-soft">
+                    {template.suggestedLevel} · {template.beatCount} beats
+                  </span>
+                </div>
+                <p className="mt-1.5 text-sm text-ink-soft">{template.summary}</p>
+                <p className="mt-2 text-xs text-ink-soft">
+                  <span className="font-medium">You want:</span> {template.userGoal}
+                </p>
               </div>
-              <p className="mt-1.5 text-sm text-ink-soft">{template.summary}</p>
-              <p className="mt-2 text-xs text-ink-soft">
-                <span className="font-medium">You want:</span> {template.userGoal}
-              </p>
             </button>
             {template.editable ? (
               <div className="flex items-center justify-between border-t border-rule px-4 py-2">
