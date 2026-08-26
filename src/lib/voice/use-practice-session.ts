@@ -53,12 +53,16 @@ export const usePracticeSession = (scenario: Scenario, settings: SessionSettings
   const [mistakes, setMistakes] = useState<LoggedMistake[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<{ outcome: string; summary: string } | null>(null);
+  const [turnSubmitting, setTurnSubmitting] = useState(false);
 
   // Read inside client tool handlers, which must not re-register on every state
   // change: the SDK keeps the latest closure, but the id is needed synchronously.
   const sessionIdRef = useRef<string | null>(null);
   const beatIndexRef = useRef(0);
   const lastLearnerAtRef = useRef<number | null>(null);
+  const turnSubmittingRef = useRef(false);
+  const turnSafetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputControlsRef = useRef<{ setMuted: (muted: boolean) => void } | null>(null);
   const recommendations = scenarioRecommendedTerms(scenario);
 
   const conversation = useConversation({
@@ -67,6 +71,14 @@ export const usePracticeSession = (scenario: Scenario, settings: SessionSettings
     onError: (message) => {
       setError(typeof message === "string" ? message : "The call failed.");
       setStatus("error");
+    },
+    onModeChange: ({ mode }) => {
+      if (mode !== "speaking" || !turnSubmittingRef.current) return;
+      turnSubmittingRef.current = false;
+      setTurnSubmitting(false);
+      if (turnSafetyTimerRef.current) clearTimeout(turnSafetyTimerRef.current);
+      turnSafetyTimerRef.current = null;
+      inputControlsRef.current?.setMuted(false);
     },
     onMessage: ({ message, source, event_id: eventId }) => {
       const role = source === "ai" ? "agent" : "learner";
@@ -218,6 +230,35 @@ export const usePracticeSession = (scenario: Scenario, settings: SessionSettings
    */
   const conversationRef = useRef(conversation);
   conversationRef.current = conversation;
+  inputControlsRef.current = conversation;
+
+  useEffect(
+    () => () => {
+      if (turnSafetyTimerRef.current) clearTimeout(turnSafetyTimerRef.current);
+    },
+    [],
+  );
+
+  /**
+   * Audio is already streaming to ElevenLabs. Muting now supplies clean silence,
+   * allowing its supported turn detector to close the turn without room noise
+   * extending the wait. The SDK has no conversational-audio commit command.
+   */
+  const finishTurn = useCallback(() => {
+    if (status !== "live" || conversationRef.current.isSpeaking || conversationRef.current.isMuted) {
+      return;
+    }
+    turnSubmittingRef.current = true;
+    setTurnSubmitting(true);
+    conversationRef.current.setMuted(true);
+    if (turnSafetyTimerRef.current) clearTimeout(turnSafetyTimerRef.current);
+    turnSafetyTimerRef.current = setTimeout(() => {
+      turnSubmittingRef.current = false;
+      setTurnSubmitting(false);
+      conversationRef.current.setMuted(false);
+      turnSafetyTimerRef.current = null;
+    }, 4_000);
+  }, [status]);
 
   /** Bind the ElevenLabs conversation id so the post-call webhook can find us. */
   const boundConversationRef = useRef(false);
@@ -294,9 +335,11 @@ export const usePracticeSession = (scenario: Scenario, settings: SessionSettings
     outcome,
     isSpeaking: conversation.isSpeaking,
     isMuted: conversation.isMuted,
+    turnSubmitting,
     setMuted: conversation.setMuted,
     start,
     stop,
     askForHelp,
+    finishTurn,
   };
 };

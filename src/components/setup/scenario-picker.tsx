@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useI18n } from "~/components/i18n-provider";
 import { scenarioImages } from "~/components/setup/scenario-images";
 import { Card } from "~/components/ui";
+import { localizeTemplate } from "~/lib/i18n/template-copy";
 import type { TemplateSummary } from "~/lib/voice/types";
 
 type Props = {
@@ -16,7 +17,7 @@ type Props = {
 };
 
 export const ScenarioPicker = ({ templates, selected, onSelect, onEdit, loading }: Props) => {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   if (loading) {
     return <p className="text-sm text-ink-soft">{t("loadingSituations")}</p>;
   }
@@ -24,6 +25,7 @@ export const ScenarioPicker = ({ templates, selected, onSelect, onEdit, loading 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {templates.map((template, index) => {
+        const copy = localizeTemplate(template, locale);
         const isSelected = template.slug === selected;
         const image = template.source === "library" ? scenarioImages[template.slug] : undefined;
         return (
@@ -44,7 +46,7 @@ export const ScenarioPicker = ({ templates, selected, onSelect, onEdit, loading 
               {image ? (
                 <Image
                   src={image.src}
-                  alt={image.alt}
+                  alt={copy.title}
                   width={768}
                   height={512}
                   sizes="(min-width: 640px) 448px, 100vw"
@@ -54,14 +56,14 @@ export const ScenarioPicker = ({ templates, selected, onSelect, onEdit, loading 
               ) : null}
               <div className="p-4">
                 <div className="flex items-baseline justify-between gap-3">
-                  <h3 className="font-serif text-base text-ink">{template.title}</h3>
+                  <h3 className="font-serif text-base text-ink">{copy.title}</h3>
                   <span className="shrink-0 text-xs text-ink-soft">
                     {template.suggestedLevel} · {template.beatCount} {t("beats")}
                   </span>
                 </div>
-                <p className="mt-1.5 text-sm text-ink-soft">{template.summary}</p>
+                <p className="mt-1.5 text-sm text-ink-soft">{copy.summary}</p>
                 <p className="mt-2 text-xs text-ink-soft">
-                  <span className="font-medium">{t("youWant")}</span> {template.userGoal}
+                  <span className="font-medium">{t("youWant")}</span> {copy.userGoal}
                 </p>
               </div>
             </button>

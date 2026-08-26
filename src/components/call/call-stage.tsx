@@ -111,7 +111,21 @@ export const CallStage = ({ scenario, settings }: Props) => {
             <Button onClick={session.askForHelp} disabled={!isLive} variant="ghost">
               {t("helpMe")}
             </Button>
-            <Button onClick={() => session.setMuted(!session.isMuted)} disabled={!isLive} variant="ghost">
+            <Button
+              onClick={session.finishTurn}
+              disabled={!isLive || session.isSpeaking || session.isMuted || session.turnSubmitting}
+              variant="ghost"
+              className="border-accent text-accent"
+            >
+              <span title={t("doneSpeakingTitle")}>
+                {session.turnSubmitting ? t("sendingTurn") : t("doneSpeaking")}
+              </span>
+            </Button>
+            <Button
+              onClick={() => session.setMuted(!session.isMuted)}
+              disabled={!isLive || session.turnSubmitting}
+              variant="ghost"
+            >
               {session.isMuted ? t("unmute") : t("mute")}
             </Button>
             <Button onClick={session.stop} variant="danger">
