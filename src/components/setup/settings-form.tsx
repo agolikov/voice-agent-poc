@@ -1,5 +1,6 @@
 "use client";
 
+import { ConnectionChecks } from "~/components/setup/connection-checks";
 import { Card, fieldClass, Label, Select } from "~/components/ui";
 import {
   correctionStyles,
@@ -98,6 +99,8 @@ export const SettingsForm = ({ settings, onChange }: Props) => {
           </span>
         </label>
       </div>
+
+      <ConnectionChecks />
 
       {/* The defaults below are the ones worth shipping; they are here for the second run. */}
       <details className="group mt-5 border-t border-rule pt-4">
