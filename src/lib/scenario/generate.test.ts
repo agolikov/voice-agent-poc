@@ -101,6 +101,16 @@ describe("the realization cache key", () => {
     expect(realizationKey(template, { ...defaultSessionSettings, cefrLevel: "C1" })).not.toBe(base);
   });
 
+  it("changes when an editable part of the template changes", () => {
+    const base = realizationKey(template, defaultSessionSettings);
+    expect(
+      realizationKey(
+        { ...template, userRole: { ...template.userRole, goal: "A newly edited goal" } },
+        defaultSessionSettings,
+      ),
+    ).not.toBe(base);
+  });
+
   /**
    * Hint mode and the repeat policy shape the conversation, not the words on the
    * page — so changing them must reuse the cached scene instead of paying for a

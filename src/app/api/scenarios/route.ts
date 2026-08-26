@@ -16,6 +16,7 @@ export const GET = async (): Promise<NextResponse> => {
       suggestedLevel: template.suggestedLevel,
       beatCount: template.beats.length,
       userGoal: template.userRole.goal,
+      editable: template.source === "generated",
     })),
   });
 };

@@ -29,8 +29,7 @@ export const realizationKey = (template: ScenarioTemplate, settings: SessionSett
   createHash("sha256")
     .update(
       JSON.stringify([
-        template.slug,
-        template.beats.map((beat) => beat.id),
+        template,
         settings.targetLanguage,
         settings.nativeLanguage,
         settings.cefrLevel,

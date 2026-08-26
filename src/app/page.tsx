@@ -7,6 +7,7 @@ import { Intro } from "~/components/setup/intro";
 import { LanguageForm } from "~/components/setup/language-form";
 import { languageLabel } from "~/components/setup/languages";
 import { ScenarioComposer } from "~/components/setup/scenario-composer";
+import { ScenarioEditor } from "~/components/setup/scenario-editor";
 import { ScenarioPicker } from "~/components/setup/scenario-picker";
 import { SettingsForm } from "~/components/setup/settings-form";
 import { WizardNav } from "~/components/setup/wizard-nav";
@@ -49,6 +50,7 @@ const SetupPage = () => {
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
   const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -141,6 +143,7 @@ const SetupPage = () => {
                 templates={templates}
                 selected={selected}
                 onSelect={setSelected}
+                onEdit={setEditing}
                 loading={loading}
               />
               <ScenarioComposer
@@ -151,6 +154,17 @@ const SetupPage = () => {
                   setSelected(template.slug);
                 }}
               />
+              {editing ? (
+                <ScenarioEditor
+                  slug={editing}
+                  onCancel={() => setEditing(null)}
+                  onSaved={(template) => {
+                    setEditing(null);
+                    setSelected(template.slug);
+                    void refreshTemplates();
+                  }}
+                />
+              ) : null}
             </div>
           ) : null}
 

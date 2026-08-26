@@ -14,6 +14,53 @@ const db = createClient({ url: process.env.DATABASE_URL ?? "file:./data/practice
 
 const scenarioId = "demo-pharmacy-es";
 const sessionId = "demo-session";
+const templateSlug = "late-parcel-demo";
+
+const savedTemplate = {
+  slug: templateSlug,
+  title: "Chasing a late parcel",
+  source: "generated",
+  summary: "Call a delivery company and find out why an overdue parcel has not arrived.",
+  setting: "A phone call to a delivery company on a weekday afternoon",
+  agentRole: {
+    name: "Alex",
+    role: "a delivery company support agent",
+    persona: "Efficient and polite, but needs precise details before offering a solution.",
+  },
+  userRole: {
+    role: "the recipient of an overdue parcel",
+    goal: "Find the parcel and get a firm new delivery date",
+  },
+  beats: [
+    {
+      id: "explain-delay",
+      intent: "Explain that the parcel is late",
+      successCriteria: "The learner states the expected delivery date",
+    },
+    {
+      id: "give-reference",
+      intent: "Give the tracking reference and confirm their details",
+      successCriteria: "The agent has enough information to look up the parcel",
+    },
+    {
+      id: "ask-location",
+      intent: "Ask where the parcel is now and what caused the delay",
+      successCriteria: "The learner gets a location and an explanation",
+    },
+    {
+      id: "agree-solution",
+      intent: "Request and agree a concrete delivery plan",
+      successCriteria: "A new delivery date or collection plan is confirmed",
+    },
+  ],
+  vocabularyConcepts: ["tracking number", "delivery window", "distribution centre"],
+  closing: "Confirm the agreed next step and end the call politely",
+  successCriteria: [
+    "The learner clearly explained the problem",
+    "They finished with a concrete next step",
+  ],
+  suggestedLevel: "B1",
+};
 
 const scenario = {
   id: scenarioId,
@@ -146,6 +193,12 @@ await db.batch(
     { sql: "delete from session where id = ?", args: [sessionId] },
     { sql: "delete from scenario where id = ?", args: [scenarioId] },
     {
+      sql: `insert into template (slug, title, payload, created_at)
+            values (?, ?, ?, ?)
+            on conflict (slug) do update set title = excluded.title, payload = excluded.payload`,
+      args: [templateSlug, savedTemplate.title, JSON.stringify(savedTemplate), now],
+    },
+    {
       sql: `insert into scenario (id, realization_key, template_slug, source, target_language, cefr_level, title, payload, created_at)
             values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [scenarioId, "demo", "pharmacy", "library", "es", "A2", scenario.title, JSON.stringify(scenario), now],
@@ -174,5 +227,6 @@ await db.batch(
 );
 
 console.log(`Seeded scenario ${scenarioId} and session ${sessionId}.`);
+console.log(`  saved editor:  / (Situation → ${savedTemplate.title} → Edit situation)`);
 console.log(`  brief + call: /practice/${scenarioId}`);
 console.log(`  debrief:      /debrief/${sessionId}`);

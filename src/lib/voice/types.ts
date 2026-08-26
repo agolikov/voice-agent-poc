@@ -27,6 +27,7 @@ export type TemplateSummary = {
   suggestedLevel: SessionSettings["cefrLevel"];
   beatCount: number;
   userGoal: string;
+  editable: boolean;
 };
 
 /** A hint currently on screen, put there by the agent's showHint call. */

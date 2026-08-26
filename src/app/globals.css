@@ -17,27 +17,34 @@
   --color-flag-soft: oklch(0.96 0.03 20);
 }
 
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-ink: oklch(0.93 0.008 85);
-    --color-ink-soft: oklch(0.7 0.012 85);
-    --color-paper: oklch(0.18 0.012 70);
-    --color-card: oklch(0.23 0.014 70);
-    --color-rule: oklch(0.32 0.014 70);
-    --color-accent: oklch(0.72 0.12 165);
-    --color-accent-soft: oklch(0.29 0.04 165);
-    --color-warn: oklch(0.78 0.12 60);
-    --color-warn-soft: oklch(0.3 0.04 60);
-    --color-flag: oklch(0.72 0.14 22);
-    --color-flag-soft: oklch(0.3 0.04 22);
-  }
+:root[data-theme="dark"] {
+  --color-ink: oklch(0.93 0.008 85);
+  --color-ink-soft: oklch(0.7 0.012 85);
+  --color-paper: oklch(0.18 0.012 70);
+  --color-card: oklch(0.23 0.014 70);
+  --color-rule: oklch(0.32 0.014 70);
+  --color-accent: oklch(0.72 0.12 165);
+  --color-accent-soft: oklch(0.29 0.04 165);
+  --color-warn: oklch(0.78 0.12 60);
+  --color-warn-soft: oklch(0.3 0.04 60);
+  --color-flag: oklch(0.72 0.14 22);
+  --color-flag-soft: oklch(0.3 0.04 22);
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 body {
   background: var(--color-paper);
   color: var(--color-ink);
+}
+
+.theme-light-action,
+:root[data-theme="dark"] .theme-dark-action {
+  display: none;
+}
+
+:root[data-theme="dark"] .theme-light-action {
+  display: inline;
 }

@@ -71,6 +71,19 @@ export const saveTemplate = async (value: ScenarioTemplate): Promise<void> => {
     });
 };
 
+/** A user-authored situation, addressed by its stable slug. */
+export const getSavedTemplate = async (slug: string): Promise<ScenarioTemplate | null> => {
+  const [row] = await db
+    .select()
+    .from(schema.template)
+    .where(eq(schema.template.slug, slug))
+    .limit(1);
+  if (!row) return null;
+
+  const parsed = scenarioTemplateSchema.safeParse(row.payload);
+  return parsed.success ? parsed.data : null;
+};
+
 export const listSavedTemplates = async (): Promise<ScenarioTemplate[]> => {
   const rows = await db.select().from(schema.template).orderBy(desc(schema.template.createdAt));
   return rows.flatMap((row) => {

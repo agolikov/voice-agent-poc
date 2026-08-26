@@ -3,24 +3,29 @@
  * limit.
  */
 export const languages = [
-  { value: "es", label: "Spanish" },
-  { value: "fr", label: "French" },
-  { value: "de", label: "German" },
-  { value: "it", label: "Italian" },
-  { value: "pt", label: "Portuguese" },
-  { value: "pl", label: "Polish" },
-  { value: "nl", label: "Dutch" },
-  { value: "sv", label: "Swedish" },
-  { value: "cs", label: "Czech" },
-  { value: "uk", label: "Ukrainian" },
-  { value: "ru", label: "Russian" },
-  { value: "tr", label: "Turkish" },
-  { value: "ja", label: "Japanese" },
-  { value: "ko", label: "Korean" },
-  { value: "zh", label: "Chinese" },
-  { value: "ar", label: "Arabic" },
-  { value: "en", label: "English" },
+  { value: "es", label: "Spanish", flag: "🇪🇸" },
+  { value: "fr", label: "French", flag: "🇫🇷" },
+  { value: "de", label: "German", flag: "🇩🇪" },
+  { value: "it", label: "Italian", flag: "🇮🇹" },
+  { value: "pt", label: "Portuguese", flag: "🇵🇹" },
+  { value: "pl", label: "Polish", flag: "🇵🇱" },
+  { value: "nl", label: "Dutch", flag: "🇳🇱" },
+  { value: "sv", label: "Swedish", flag: "🇸🇪" },
+  { value: "cs", label: "Czech", flag: "🇨🇿" },
+  { value: "uk", label: "Ukrainian", flag: "🇺🇦" },
+  { value: "ru", label: "Russian", flag: "🇷🇺" },
+  { value: "tr", label: "Turkish", flag: "🇹🇷" },
+  { value: "ja", label: "Japanese", flag: "🇯🇵" },
+  { value: "ko", label: "Korean", flag: "🇰🇷" },
+  { value: "zh", label: "Chinese", flag: "🇨🇳" },
+  { value: "ar", label: "Arabic", flag: "🇸🇦" },
+  { value: "en", label: "English", flag: "🇬🇧" },
 ] as const;
 
 export const languageLabel = (value: string) =>
   languages.find((language) => language.value === value)?.label ?? value;
+
+export const languageOptions = languages.map((language) => ({
+  value: language.value,
+  label: `${language.flag}  ${language.label}`,
+}));

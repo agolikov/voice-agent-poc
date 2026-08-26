@@ -1,6 +1,6 @@
 "use client";
 
-import { languages } from "~/components/setup/languages";
+import { languageOptions } from "~/components/setup/languages";
 import { Card, Select } from "~/components/ui";
 import { cefrLevels } from "~/lib/scenario/schema";
 import type { SessionSettings } from "~/lib/session/settings";
@@ -20,14 +20,14 @@ export const LanguageForm = ({ settings, onChange }: Props) => {
         <Select
           label="I am learning"
           value={settings.targetLanguage}
-          options={languages}
+          options={languageOptions}
           onChange={(value) => set("targetLanguage", value)}
           hint="The whole scene is written and spoken in this language."
         />
         <Select
           label="My language"
           value={settings.nativeLanguage}
-          options={languages}
+          options={languageOptions}
           onChange={(value) => set("nativeLanguage", value)}
           hint="Used for translations and, if you allow it, for cues."
         />

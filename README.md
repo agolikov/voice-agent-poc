@@ -93,9 +93,9 @@ The microphone needs `localhost` or HTTPS.
 pnpm db:seed
 ```
 
-Seeds one hand-written Spanish scene and one finished session, so
-`/practice/demo-pharmacy-es` and `/debrief/demo-session` are inspectable with
-nothing configured.
+Seeds one editable saved situation, one hand-written Spanish scene and one
+finished session, so the situation editor, `/practice/demo-pharmacy-es` and
+`/debrief/demo-session` are inspectable with nothing configured.
 
 ## How it fits together
 
