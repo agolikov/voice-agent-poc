@@ -3,17 +3,48 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { Intro } from "~/components/setup/intro";
+import { LanguageForm } from "~/components/setup/language-form";
+import { languageLabel } from "~/components/setup/languages";
 import { ScenarioComposer } from "~/components/setup/scenario-composer";
 import { ScenarioPicker } from "~/components/setup/scenario-picker";
 import { SettingsForm } from "~/components/setup/settings-form";
+import { WizardNav } from "~/components/setup/wizard-nav";
 import { Button, Card } from "~/components/ui";
 import type { Scenario } from "~/lib/scenario/schema";
 import { loadSettings, saveSettings } from "~/lib/session/store";
 import { defaultSessionSettings, type SessionSettings } from "~/lib/session/settings";
 import type { TemplateSummary } from "~/lib/voice/types";
 
+const steps = [
+  {
+    label: "What this is",
+    title: "Practise a real conversation, out loud",
+    blurb:
+      "CallMode gives you the other person: a voice agent that plays the pharmacist, the hiring manager, the landlord — and waits for you to speak.",
+  },
+  {
+    label: "Language",
+    title: "What are you learning?",
+    blurb: "This decides the language of the scene and how hard the lines you have to say will be.",
+  },
+  {
+    label: "Situation",
+    title: "What do you want to practise?",
+    blurb: "Pick one of these, or describe a situation of your own and it gets written for you.",
+  },
+  {
+    label: "How it runs",
+    title: "How much help do you want?",
+    blurb:
+      "Everything here is per run. Change any of it and the same situation plays differently next time.",
+  },
+] as const;
+
 const SetupPage = () => {
   const router = useRouter();
+  const [step, setStep] = useState(0);
+  const [furthest, setFurthest] = useState(0);
   const [settings, setSettings] = useState<SessionSettings>(defaultSessionSettings);
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +68,13 @@ const SetupPage = () => {
   const update = (next: SessionSettings) => {
     setSettings(next);
     saveSettings(next);
+  };
+
+  const goTo = (next: number) => {
+    setStep(next);
+    setFurthest((seen) => Math.max(seen, next));
+    setError(null);
+    window.scrollTo({ top: 0 });
   };
 
   /**
@@ -64,54 +102,94 @@ const SetupPage = () => {
     }
   };
 
+  const selectedTitle = templates.find((template) => template.slug === selected)?.title;
+  const isLast = step === steps.length - 1;
+  /** The situation is the one thing the wizard cannot supply a default for. */
+  const blocked = step === 2 && !selected;
+
+  const summary = [
+    step > 0 ? `${languageLabel(settings.targetLanguage)} · ${settings.cefrLevel}` : null,
+    step > 1 ? (selectedTitle ?? (selected ? "Your situation" : "No situation yet")) : null,
+  ].filter(Boolean) as string[];
+
   return (
     <main className="mx-auto max-w-4xl px-5 py-10">
       <header>
-        <h1 className="font-serif text-3xl text-ink">CallMode</h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          Pick a situation, or write one. Then have the conversation out loud — and press{" "}
-          <kbd className="rounded border border-rule px-1">H</kbd> whenever you are stuck.
-        </p>
+        <h1 className="font-serif text-xl text-ink">CallMode</h1>
+        <div className="mt-5">
+          <WizardNav
+            steps={steps.map((entry) => entry.label)}
+            current={step}
+            furthest={furthest}
+            onSelect={goTo}
+          />
+        </div>
       </header>
 
       <section className="mt-8">
-        <h2 className="mb-3 font-serif text-lg text-ink">Choose a situation</h2>
-        <ScenarioPicker
-          templates={templates}
-          selected={selected}
-          onSelect={setSelected}
-          loading={loading}
-        />
-      </section>
+        <h2 className="font-serif text-2xl text-ink">{steps[step]!.title}</h2>
+        <p className="mt-1.5 text-sm text-ink-soft">{steps[step]!.blurb}</p>
 
-      <section className="mt-5">
-        <ScenarioComposer
-          settings={settings}
-          onCreated={(template) => {
-            void refreshTemplates();
-            setSelected(template.slug);
-          }}
-        />
-      </section>
+        <div className="mt-6">
+          {step === 0 ? <Intro /> : null}
 
-      <section className="mt-8">
-        <SettingsForm settings={settings} onChange={update} />
+          {step === 1 ? <LanguageForm settings={settings} onChange={update} /> : null}
+
+          {step === 2 ? (
+            <div className="grid gap-5">
+              <ScenarioPicker
+                templates={templates}
+                selected={selected}
+                onSelect={setSelected}
+                loading={loading}
+              />
+              <ScenarioComposer
+                settings={settings}
+                onSettingsChange={update}
+                onCreated={(template) => {
+                  void refreshTemplates();
+                  setSelected(template.slug);
+                }}
+              />
+            </div>
+          ) : null}
+
+          {step === 3 ? <SettingsForm settings={settings} onChange={update} /> : null}
+        </div>
       </section>
 
       <div className="sticky bottom-0 mt-8 -mx-5 border-t border-rule bg-paper/90 px-5 py-4 backdrop-blur">
         <div className="flex items-center justify-between gap-4">
-          <p className="text-sm text-ink-soft">
-            {selected
-              ? `Ready: ${templates.find((template) => template.slug === selected)?.title ?? selected}`
-              : "Pick a situation to begin."}
-          </p>
-          <Button onClick={begin} disabled={!selected || preparing}>
-            {preparing ? "Setting the scene…" : "Start"}
-          </Button>
+          <div className="min-w-0">
+            {step > 0 ? (
+              <Button onClick={() => goTo(step - 1)} variant="ghost">
+                Back
+              </Button>
+            ) : null}
+          </div>
+
+          <div className="flex items-center gap-4">
+            {summary.length > 0 ? (
+              <p className="hidden truncate text-sm text-ink-soft sm:block">
+                {summary.join(" · ")}
+              </p>
+            ) : null}
+            {isLast ? (
+              <Button onClick={begin} disabled={!selected || preparing}>
+                {preparing ? "Setting the scene…" : "Start"}
+              </Button>
+            ) : (
+              <Button onClick={() => goTo(step + 1)} disabled={blocked}>
+                {step === 0 ? "Get started" : "Next"}
+              </Button>
+            )}
+          </div>
         </div>
-        {error ? (
-          <Card className="mt-3 border-flag p-3 text-sm text-flag">{error}</Card>
+
+        {blocked ? (
+          <p className="mt-2 text-right text-xs text-ink-soft">Pick a situation to carry on.</p>
         ) : null}
+        {error ? <Card className="mt-3 border-flag p-3 text-sm text-flag">{error}</Card> : null}
       </div>
     </main>
   );

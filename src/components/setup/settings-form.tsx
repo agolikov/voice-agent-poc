@@ -1,10 +1,7 @@
 "use client";
 
 import { Card, fieldClass, Label, Select } from "~/components/ui";
-import { cefrLevels } from "~/lib/scenario/schema";
 import {
-  beatCountPresets,
-  beatCountRange,
   correctionStyles,
   hintLengths,
   hintModes,
@@ -13,30 +10,6 @@ import {
   speechRates,
   type SessionSettings,
 } from "~/lib/session/settings";
-
-/**
- * Languages offered up front. Any BCP-47 tag works — this is a shortlist, not a
- * limit, and the field accepts anything typed into it.
- */
-const languages = [
-  { value: "es", label: "Spanish" },
-  { value: "fr", label: "French" },
-  { value: "de", label: "German" },
-  { value: "it", label: "Italian" },
-  { value: "pt", label: "Portuguese" },
-  { value: "pl", label: "Polish" },
-  { value: "nl", label: "Dutch" },
-  { value: "sv", label: "Swedish" },
-  { value: "cs", label: "Czech" },
-  { value: "uk", label: "Ukrainian" },
-  { value: "ru", label: "Russian" },
-  { value: "tr", label: "Turkish" },
-  { value: "ja", label: "Japanese" },
-  { value: "ko", label: "Korean" },
-  { value: "zh", label: "Chinese" },
-  { value: "ar", label: "Arabic" },
-  { value: "en", label: "English" },
-] as const;
 
 const hintModeLabels: Record<(typeof hintModes)[number], string> = {
   "target-only": "Target language only",
@@ -77,106 +50,16 @@ export const SettingsForm = ({ settings, onChange }: Props) => {
   const set = <K extends keyof SessionSettings>(key: K, value: SessionSettings[K]) =>
     onChange({ ...settings, [key]: value });
 
-  const { min, max } = beatCountRange[settings.beatCount];
-
   return (
     <Card className="p-5">
-      <h2 className="font-serif text-lg text-ink">Settings for this run</h2>
-      <p className="mt-1 text-sm text-ink-soft">
-        All of it changes per run. Pick something different next time and the same situation plays
-        differently.
-      </p>
-
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Select
-          label="I am learning"
-          value={settings.targetLanguage}
-          options={languages}
-          onChange={(value) => set("targetLanguage", value)}
-        />
-        <Select
-          label="My language"
-          value={settings.nativeLanguage}
-          options={languages}
-          onChange={(value) => set("nativeLanguage", value)}
-        />
-        <Select
-          label="My level"
-          value={settings.cefrLevel}
-          options={cefrLevels.map((level) => ({ value: level, label: level }))}
-          onChange={(value) => set("cefrLevel", value)}
-          hint="Sets how long and how complex the lines you have to say will be."
-        />
-        <Select
-          label="Scene length"
-          value={settings.beatCount}
-          options={beatCountPresets.map((preset) => ({
-            value: preset,
-            label: `${preset[0]?.toUpperCase()}${preset.slice(1)} (${beatCountRange[preset].min}–${beatCountRange[preset].max} beats)`,
-          }))}
-          onChange={(value) => set("beatCount", value)}
-          hint={`New situations you write will get ${min}–${max} beats.`}
-        />
-      </div>
-
-      <hr className="my-6 border-rule" />
-
-      <h3 className="font-serif text-base text-ink">When you ask for help</h3>
-      <div className="mt-3 grid gap-4 sm:grid-cols-2">
-        <Select
-          label="What you hear"
+          label="When you ask for help"
           value={settings.hintMode}
           options={hintModes.map((mode) => ({ value: mode, label: hintModeLabels[mode] }))}
           onChange={(value) => set("hintMode", value)}
           hint={hintModeHints[settings.hintMode]}
         />
-        <Select
-          label="How long the hint is"
-          value={settings.hintLength}
-          options={[
-            { value: hintLengths[0], label: "Short — the least that works" },
-            { value: hintLengths[1], label: "A full sentence" },
-          ]}
-          onChange={(value) => set("hintLength", value)}
-        />
-        <Select
-          label="If you cannot repeat it"
-          value={settings.repeatPolicy}
-          options={repeatPolicies.map((policy) => ({
-            value: policy,
-            label: repeatPolicyLabels[policy],
-          }))}
-          onChange={(value) => set("repeatPolicy", value)}
-          hint={repeatPolicyHints[settings.repeatPolicy]}
-        />
-        <Select
-          label="How close is close enough"
-          value={settings.repeatTolerance}
-          options={repeatTolerances.map((tolerance) => ({
-            value: tolerance,
-            label: toleranceLabels[tolerance],
-          }))}
-          onChange={(value) => set("repeatTolerance", value)}
-        />
-        <label className="block sm:col-span-2">
-          <Label>Say this out loud to ask for help</Label>
-          <input
-            className={fieldClass}
-            value={settings.helpTrigger}
-            onChange={(event) => set("helpTrigger", event.target.value)}
-          />
-          <span className="mt-1 block text-xs text-ink-soft">
-            Pressing <kbd className="rounded border border-rule px-1">H</kbd> or the button always
-            works and never goes through speech recognition. A single letter makes a poor spoken
-            trigger, so keep this a word.
-          </span>
-        </label>
-      </div>
-
-      <hr className="my-6 border-rule" />
-
-      <h3 className="font-serif text-base text-ink">The other person</h3>
-      <div className="mt-3 grid gap-4 sm:grid-cols-2">
         <Select
           label="Corrections"
           value={settings.correctionStyle}
@@ -194,15 +77,6 @@ export const SettingsForm = ({ settings, onChange }: Props) => {
             { value: speechRates[1], label: "Natural" },
           ]}
           onChange={(value) => set("agentSpeechRate", value)}
-        />
-        <Select
-          label="May they use your language?"
-          value={settings.allowNativeLanguage ? "yes" : "no"}
-          options={[
-            { value: "no", label: "No — full immersion" },
-            { value: "yes", label: "Yes, if I am truly stuck" },
-          ]}
-          onChange={(value) => set("allowNativeLanguage", value === "yes")}
         />
         <label className="block">
           <Label>End the call after</Label>
@@ -224,6 +98,67 @@ export const SettingsForm = ({ settings, onChange }: Props) => {
           </span>
         </label>
       </div>
+
+      {/* The defaults below are the ones worth shipping; they are here for the second run. */}
+      <details className="group mt-5 border-t border-rule pt-4">
+        <summary className="cursor-pointer list-none text-sm font-medium text-ink-soft transition hover:text-ink">
+          <span className="mr-1.5 inline-block transition group-open:rotate-90">›</span>
+          Fine-tune the help loop
+        </summary>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Select
+            label="How long the hint is"
+            value={settings.hintLength}
+            options={[
+              { value: hintLengths[0], label: "Short — the least that works" },
+              { value: hintLengths[1], label: "A full sentence" },
+            ]}
+            onChange={(value) => set("hintLength", value)}
+          />
+          <Select
+            label="If you cannot repeat it"
+            value={settings.repeatPolicy}
+            options={repeatPolicies.map((policy) => ({
+              value: policy,
+              label: repeatPolicyLabels[policy],
+            }))}
+            onChange={(value) => set("repeatPolicy", value)}
+            hint={repeatPolicyHints[settings.repeatPolicy]}
+          />
+          <Select
+            label="How close is close enough"
+            value={settings.repeatTolerance}
+            options={repeatTolerances.map((tolerance) => ({
+              value: tolerance,
+              label: toleranceLabels[tolerance],
+            }))}
+            onChange={(value) => set("repeatTolerance", value)}
+          />
+          <Select
+            label="May they use your language?"
+            value={settings.allowNativeLanguage ? "yes" : "no"}
+            options={[
+              { value: "no", label: "No — full immersion" },
+              { value: "yes", label: "Yes, if I am truly stuck" },
+            ]}
+            onChange={(value) => set("allowNativeLanguage", value === "yes")}
+          />
+          <label className="block sm:col-span-2">
+            <Label>Say this out loud to ask for help</Label>
+            <input
+              className={fieldClass}
+              value={settings.helpTrigger}
+              onChange={(event) => set("helpTrigger", event.target.value)}
+            />
+            <span className="mt-1 block text-xs text-ink-soft">
+              Pressing <kbd className="rounded border border-rule px-1">H</kbd> or the button always
+              works and never goes through speech recognition. A single letter makes a poor spoken
+              trigger, so keep this a word.
+            </span>
+          </label>
+        </div>
+      </details>
     </Card>
   );
 };

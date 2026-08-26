@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 
-import { Button, Card, fieldClass, Label } from "~/components/ui";
-import type { SessionSettings } from "~/lib/session/settings";
+import { Button, Card, fieldClass, Label, Select } from "~/components/ui";
+import {
+  beatCountPresets,
+  beatCountRange,
+  type SessionSettings,
+} from "~/lib/session/settings";
 import type { ScenarioTemplate } from "~/lib/scenario/schema";
 
 type Props = {
   settings: SessionSettings;
+  onSettingsChange: (settings: SessionSettings) => void;
   onCreated: (template: ScenarioTemplate) => void;
 };
 
@@ -17,10 +22,12 @@ const examples = [
   "Explaining to a mechanic what noise my car is making",
 ];
 
-export const ScenarioComposer = ({ settings, onCreated }: Props) => {
+export const ScenarioComposer = ({ settings, onSettingsChange, onCreated }: Props) => {
   const [description, setDescription] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { min, max } = beatCountRange[settings.beatCount];
 
   const create = async () => {
     setBusy(true);
@@ -65,11 +72,24 @@ export const ScenarioComposer = ({ settings, onCreated }: Props) => {
           </button>
         ))}
       </div>
-      <div className="mt-3 flex items-center gap-3">
-        <Button onClick={create} disabled={busy || description.trim().length < 3} variant="ghost">
-          {busy ? "Writing the scene…" : "Write it"}
-        </Button>
-        {error ? <span className="text-xs text-flag">{error}</span> : null}
+      <div className="mt-4 grid items-end gap-4 sm:grid-cols-2">
+        {/* Scene length only shapes situations you write; the curated ones already have their beats. */}
+        <Select
+          label="How long a scene to write"
+          value={settings.beatCount}
+          options={beatCountPresets.map((preset) => ({
+            value: preset,
+            label: `${preset[0]?.toUpperCase()}${preset.slice(1)} — ${beatCountRange[preset].min}–${beatCountRange[preset].max} beats`,
+          }))}
+          onChange={(value) => onSettingsChange({ ...settings, beatCount: value })}
+          hint={`Yours will get ${min}–${max} beats.`}
+        />
+        <div className="flex items-center gap-3 pb-5">
+          <Button onClick={create} disabled={busy || description.trim().length < 3} variant="ghost">
+            {busy ? "Writing the scene…" : "Write it"}
+          </Button>
+          {error ? <span className="text-xs text-flag">{error}</span> : null}
+        </div>
       </div>
     </Card>
   );
