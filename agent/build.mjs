@@ -15,7 +15,20 @@ const prompt = readFileSync(join(here, "prompts/roleplay-tutor.md"), "utf8").tri
 
 const toolNames = readdirSync(join(here, "tool_configs"))
   .filter((file) => file.endsWith(".json"))
-  .map((file) => file.replace(/\.json$/, ""));
+  .map((file) => file.replace(/\.json$/, ""))
+  .sort();
+
+const toolsRegistryPath = resolve(here, "..", "tools.json");
+const toolsRegistry = JSON.parse(readFileSync(toolsRegistryPath, "utf8"));
+const toolIds = toolNames.map((name) => {
+  const tool = toolsRegistry.tools?.find((candidate) => candidate.name === name);
+  if (!tool?.id) {
+    throw new Error(
+      `No ElevenLabs ID found for client tool '${name}'. Run 'npx @elevenlabs/cli tools push' before building the agent config.`,
+    );
+  }
+  return tool.id;
+});
 
 const config = {
   name: "CallMode role-play tutor",
@@ -35,6 +48,8 @@ const config = {
       mode: "turn",
     },
     tts: {
+      // The app overrides language per conversation, so the base must use a
+      // multilingual model rather than the English-only Flash v2.
       model_id: "eleven_flash_v2_5",
       voice_id: "cjVigY5qzO86Huf0OWal",
       supported_voices: [],
@@ -66,14 +81,16 @@ const config = {
     language_presets: {},
     agent: {
       first_message: "",
-      language: "en",
+      // Spanish matches the app's default target language. Using English here
+      // makes the API reject the multilingual TTS model during agent creation.
+      language: "es",
       dynamic_variables: { dynamic_variable_placeholders: {} },
       prompt: {
         prompt,
         llm: "gemini-2.5-flash",
         temperature: 0.3,
         max_tokens: -1,
-        tool_ids: [],
+        tool_ids: toolIds,
         mcp_server_ids: [],
         native_mcp_server_ids: [],
         knowledge_base: [],
@@ -173,4 +190,4 @@ writeFileSync(outPath, `${JSON.stringify(config, null, 2)}\n`);
 const placeholders = [...new Set([...prompt.matchAll(/\{\{([a-z_]+)\}\}/g)].map((m) => m[1]))];
 console.log(`Wrote ${outPath}`);
 console.log(`  prompt: ${prompt.length} chars, ${placeholders.length} dynamic variables`);
-console.log(`  client tools to attach: ${toolNames.join(", ")}`);
+console.log(`  client tools attached: ${toolNames.join(", ")}`);

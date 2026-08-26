@@ -65,9 +65,9 @@ The agent is configuration as code. Its prompt lives in
 it.
 
 ```sh
-node agent/build.mjs                       # prompt.md -> agent_configs/*.json
 npx @elevenlabs/cli auth login
 npx @elevenlabs/cli tools push             # the six client tools
+node agent/build.mjs                       # prompt.md + tool ids -> agent config
 npx @elevenlabs/cli agents push --dry-run  # check the diff first
 npx @elevenlabs/cli agents push
 ```

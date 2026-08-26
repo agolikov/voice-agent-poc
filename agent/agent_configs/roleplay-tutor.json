@@ -41,7 +41,7 @@
     "language_presets": {},
     "agent": {
       "first_message": "",
-      "language": "en",
+      "language": "es",
       "dynamic_variables": {
         "dynamic_variable_placeholders": {}
       },
@@ -50,7 +50,14 @@
         "llm": "gemini-2.5-flash",
         "temperature": 0.3,
         "max_tokens": -1,
-        "tool_ids": [],
+        "tool_ids": [
+          "tool_0101m0ytxmvwfb6tevw9m8r3rpvt",
+          "tool_0701m0ytxn1pfyzajhxsgj63fd2s",
+          "tool_2601m0ytxn76fb3vtfr2qh08v421",
+          "tool_8701m0ytxncker6ak1gj26bsj9dh",
+          "tool_5901m0ytxnj1enabv3x3nvy1ebzj",
+          "tool_1301m0ytxnqbewjbwhbsr5fbg09t"
+        ],
         "mcp_server_ids": [],
         "native_mcp_server_ids": [],
         "knowledge_base": [],

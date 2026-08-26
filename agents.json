@@ -1,8 +1,11 @@
 {
-  "agents": [
-    {
-      "name": "CallMode role-play tutor",
-      "config": "agent/agent_configs/roleplay-tutor.json"
-    }
-  ]
+    "agents": [
+        {
+            "name": "CallMode role-play tutor",
+            "config": "agent/agent_configs/roleplay-tutor.json",
+            "id": "agent_0401m0yvg5z7e69sqzqw0zn0vqmf",
+            "version_id": "agtvrsn_0201m0yvjks1fcrr1knxabpmm137",
+            "branch_id": "agtbrch_5601m0yvg6jneevtc2wkykt6ezd3"
+        }
+    ]
 }
