@@ -36,4 +36,7 @@ COPY --from=build /app/scripts ./scripts
 COPY --from=build /app/package.json /app/next.config.ts ./
 RUN mkdir -p /app/data
 EXPOSE 3000
-CMD ["sh", "-c", "node scripts/migrate.mjs && exec pnpm start"]
+# `next` directly rather than through pnpm: corepack would otherwise fetch
+# pnpm from the registry on every container start, making a restart depend on
+# npm being reachable.
+CMD ["sh", "-c", "node scripts/migrate.mjs && exec node_modules/.bin/next start"]
