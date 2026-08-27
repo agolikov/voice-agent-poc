@@ -15,6 +15,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:push": "drizzle-kit push",
+    "db:migrate": "node scripts/migrate.mjs",
     "db:studio": "drizzle-kit studio",
     "db:seed": "node scripts/seed-demo.mjs",
     "agent:pull": "elevenlabs agents pull",

@@ -1,0 +1,16 @@
+.git
+.github
+node_modules
+.next
+out
+build
+data
+drizzle.config.ts
+.env
+.env.local
+.env*.local
+*.tsbuildinfo
+.playwright-mcp
+coverage
+*.png
+.DS_Store
