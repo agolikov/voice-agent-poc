@@ -101,6 +101,25 @@ describe("the realization cache key", () => {
     expect(realizationKey(template, { ...defaultSessionSettings, cefrLevel: "C1" })).not.toBe(base);
   });
 
+  /**
+   * Two photos of two different menus are two different scenes. They share a
+   * template slug, so without this the second one would silently replay the
+   * first one's cached realization — the wrong dishes at the wrong prices.
+   */
+  it("changes when the photo behind the situation changes", () => {
+    const base = realizationKey(template, defaultSessionSettings);
+    const withPhoto = realizationKey(
+      { ...template, imageContext: "Menu board: Pulpo a la gallega — 14,50 €" },
+      defaultSessionSettings,
+    );
+    const otherPhoto = realizationKey(
+      { ...template, imageContext: "Menu board: Bacalao al pil pil — 18 €" },
+      defaultSessionSettings,
+    );
+    expect(withPhoto).not.toBe(base);
+    expect(otherPhoto).not.toBe(withPhoto);
+  });
+
   it("changes when an editable part of the template changes", () => {
     const base = realizationKey(template, defaultSessionSettings);
     expect(

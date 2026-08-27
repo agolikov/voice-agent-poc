@@ -25,6 +25,13 @@ The button and the <kbd>H</kbd> key send a literal `[HELP]` message and never to
 speech recognition, so they cannot be misheard. The spoken trigger is a fallback,
 boosted through ASR keywords.
 
+The whole script is also available before the call, collapsed, behind one
+confirmation. It is a spoiler in the strict sense — the scene works by putting you
+somewhere you have to produce a line, and reading it first replaces producing it
+with recognising it — so it asks whether you are sure, and it is not offered once
+the call is live. It exists because a learner too nervous to press the button does
+not practise at all.
+
 ## Everything is a per-run setting
 
 Target and native language, level, hint mode, hint length, repeat policy and
@@ -50,6 +57,21 @@ level on first use and then cached, so the second run of the same situation cost
 nothing. Situations you describe yourself become templates too, and go through the
 identical path.
 
+### Build one from a photo
+
+Photograph the menu in front of you, the timetable on the wall, the letter from
+the tax office. A vision model reads it once, and the scene is written from what
+is actually in it: the real dishes at the real prices, the platform number that
+is really printed there.
+
+The reading is shown to you before anything is written on top of it, in a box you
+can edit — a misread price is obvious there and invisible three steps later. What
+gets stored on the template is that text, not the image, so replaying the
+situation next month does not depend on the photo still existing.
+
+A photo is a brief on its own: leave the description empty and the scene is built
+from the picture alone. `AI_VISION_MODEL` picks the model that does the reading.
+
 ## Setup
 
 ```sh
@@ -57,6 +79,12 @@ pnpm install
 cp .env.example .env.local        # then fill it in
 pnpm db:push                      # create the SQLite tables
 ```
+
+`AI_BASE_URL` takes any OpenAI-compatible endpoint; leave it empty to talk to
+Anthropic directly. `AI_VISION_MODEL` is the model that reads photos, and has to
+be vision-capable — unset, `AI_MODEL` is asked to look, which is right for
+Anthropic and wrong for a text-only open-weights endpoint. On Nebius,
+`Qwen/Qwen2.5-VL-72B-Instruct` reads a menu down to the cents.
 
 ### 1. Create the agent
 
@@ -100,11 +128,11 @@ finished session, so the situation editor, `/practice/demo-pharmacy-es` and
 ## How it fits together
 
 ```
-src/lib/scenario/    templates, realization, the generation prompts
+src/lib/scenario/    templates, realization, reading photos, the generation prompts
 src/lib/session/     settings, dynamic variables, similarity scoring
 src/lib/voice/       the practice session hook and its client tools
 src/lib/db/          drizzle schema and queries
-src/app/api/         token minting, scenarios, sessions, the post-call webhook
+src/app/api/         token minting, scenarios, vision, sessions, the post-call webhook
 agent/               agent + client tool config, and the prompt they are built from
 ```
 
@@ -141,7 +169,10 @@ pnpm build
 
 The suite covers the prompt/variable contract, all three hint modes, the ASR
 keyword cap, template/realization merging including malformed and incomplete model
-responses, the cache key, repeat scoring at each tolerance, and webhook signature
+responses, the cache key — including that two photos of two different menus do not
+collide on it — what the vision endpoint will and will not accept from the
+browser, that a photo reaches both the model that designs the scene and the model
+that writes its lines, repeat scoring at each tolerance, and webhook signature
 verification against tampered, wrong-secret, replayed and malformed deliveries.
 
 ## Cost

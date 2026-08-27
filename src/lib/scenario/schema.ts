@@ -130,6 +130,14 @@ export const scenarioTemplateSchema = z.object({
   beats: z.array(beatTemplateSchema).min(1),
   /** Concepts the scene needs, in English. Realization translates them. */
   vocabularyConcepts: z.array(z.string().min(1)).default([]),
+  /**
+   * What a photo the learner attached actually showed — the menu items, the
+   * prices, the times on the ticket. Read once by a vision model and then kept
+   * as text, because it is the text that both prompts need: the scene is only
+   * grounded in the photo if the model answers name the real dish at the real
+   * price. Empty for every situation built without one.
+   */
+  imageContext: z.string().default(""),
   closing: z.string().min(1),
   successCriteria: z.array(z.string().min(1)).default([]),
   /** Rough difficulty, used to sort the picker. Not a hard gate. */

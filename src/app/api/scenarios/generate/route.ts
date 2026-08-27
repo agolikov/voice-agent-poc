@@ -6,11 +6,19 @@ import { uiLocales } from "~/lib/i18n/locale";
 import { generateTemplate } from "~/lib/scenario/generate";
 import { sessionSettingsSchema } from "~/lib/session/settings";
 
-const bodySchema = z.object({
-  description: z.string().min(3).max(500),
-  settings: sessionSettingsSchema,
-  uiLocale: z.enum(uiLocales).default("en"),
-});
+const bodySchema = z
+  .object({
+    description: z.string().max(500).default(""),
+    /** What /api/scenarios/vision read off a photo, possibly edited by the learner. */
+    imageContext: z.string().max(4_000).default(""),
+    settings: sessionSettingsSchema,
+    uiLocale: z.enum(uiLocales).default("en"),
+  })
+  // A photo is a brief on its own, so either half will do — but not neither.
+  .refine(
+    (body) => body.description.trim().length >= 3 || body.imageContext.trim().length > 0,
+    { error: "Describe the situation, or attach a photo to build one from." },
+  );
 
 /**
  * Turn a free-text request into a saved template. It is not realized here — the
@@ -24,11 +32,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
   }
 
   try {
-    const template = await generateTemplate(
-      body.data.description,
-      body.data.settings,
-      body.data.uiLocale,
-    );
+    const template = await generateTemplate(body.data);
     await saveTemplate(template);
     return NextResponse.json({ template });
   } catch (error) {

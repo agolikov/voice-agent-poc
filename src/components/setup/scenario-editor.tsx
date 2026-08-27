@@ -303,6 +303,18 @@ export const ScenarioEditor = ({ slug, onCancel, onSaved }: Props) => {
               value={template.closing}
               onChange={(closing) => patch({ closing })}
             />
+            {/* Only situations built from a photo have this, and it is what the
+                scene's lines are written from — a wrong price here becomes a
+                wrong price in the dialogue. */}
+            {template.imageContext ? (
+              <TextField
+                label={t("whatPhotoShows")}
+                value={template.imageContext}
+                onChange={(imageContext) => patch({ imageContext })}
+                multiline
+                hint={t("whatPhotoShowsHint")}
+              />
+            ) : null}
           </div>
         ) : null}
 

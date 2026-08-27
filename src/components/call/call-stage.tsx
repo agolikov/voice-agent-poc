@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { BeatTracker } from "~/components/call/beat-tracker";
 import { useI18n } from "~/components/i18n-provider";
 import { HintCard } from "~/components/call/hint-card";
+import { ScriptPreview } from "~/components/call/script-preview";
 import { Transcript } from "~/components/call/transcript";
 import { Button, Card } from "~/components/ui";
 import type { Scenario } from "~/lib/scenario/schema";
@@ -101,6 +102,10 @@ export const CallStage = ({ scenario, settings }: Props) => {
             </Button>
           </Card>
         ) : null}
+
+        {/* Only before the call: mid-scene it stops being a way to steady your
+            nerves and becomes a script to read from. */}
+        {status === "idle" ? <ScriptPreview scenario={scenario} /> : null}
 
         {status === "error" ? (
           <Card className="border-flag p-4 text-sm text-flag">{session.error}</Card>

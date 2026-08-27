@@ -3,12 +3,12 @@ import { createHash, randomUUID } from "node:crypto";
 import { generateObject } from "ai";
 
 import { getModel } from "~/lib/scenario/provider";
-import type { UiLocale } from "~/lib/i18n/locale";
 import {
   buildRealizationPrompt,
   buildTemplatePrompt,
   REALIZATION_SYSTEM_PROMPT,
   templateSystemPrompt,
+  type TemplateRequest,
 } from "~/lib/scenario/prompt";
 import {
   normalizeBeats,
@@ -48,17 +48,20 @@ const slugify = (text: string): string =>
     .replace(/^-+|-+$/g, "")
     .slice(0, 60) || "situation";
 
-/** Design a template from the learner's own description of a situation. */
-export const generateTemplate = async (
-  description: string,
-  settings: SessionSettings,
-  uiLocale: UiLocale = "en",
-): Promise<ScenarioTemplate> => {
+/**
+ * Design a template from the learner's own description of a situation, from a
+ * photo they took, or from both.
+ *
+ * `imageContext` is written onto the template rather than left in the prompt:
+ * realization needs it too, and it has to survive being saved so that running
+ * the same situation again next month still knows what was on the menu.
+ */
+export const generateTemplate = async (request: TemplateRequest): Promise<ScenarioTemplate> => {
   const { object } = await generateObject({
     model: getModel(),
-    schema: scenarioTemplateSchema.omit({ slug: true, source: true }),
-    system: templateSystemPrompt(uiLocale),
-    prompt: buildTemplatePrompt(description, settings, uiLocale),
+    schema: scenarioTemplateSchema.omit({ slug: true, source: true, imageContext: true }),
+    system: templateSystemPrompt(request.uiLocale ?? "en"),
+    prompt: buildTemplatePrompt(request),
   });
 
   return scenarioTemplateSchema.parse({
@@ -68,6 +71,7 @@ export const generateTemplate = async (
       return slug === "situation" ? `situation-${randomUUID().slice(0, 8)}` : slug;
     })(),
     source: "generated",
+    imageContext: request.imageContext?.trim() ?? "",
   });
 };
 
