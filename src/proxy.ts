@@ -1,7 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { decideAccess } from "~/lib/auth/decide";
+import { decideAccess, visitorOrigin } from "~/lib/auth/decide";
 import { accessCookie, accessCookieName, readPasscode } from "~/lib/auth/gate";
+
+const redirectTo = (location: string, request: NextRequest): NextResponse => {
+  const origin =
+    visitorOrigin({
+      forwardedHost: request.headers.get("x-forwarded-host"),
+      host: request.headers.get("host"),
+      forwardedProto: request.headers.get("x-forwarded-proto"),
+      fallbackProtocol: request.nextUrl.protocol,
+    }) ?? request.nextUrl.origin;
+  return NextResponse.redirect(new URL(location, origin));
+};
 
 /**
  * The site-wide access gate. See src/lib/auth/gate.ts for what it is and is
@@ -23,12 +34,12 @@ export const proxy = (request: NextRequest): NextResponse => {
 
   switch (decision.action) {
     case "unlock": {
-      const response = NextResponse.redirect(new URL(decision.redirectTo, request.url));
+      const response = redirectTo(decision.redirectTo, request);
       response.cookies.set(accessCookie(passcode, nowSeconds));
       return response;
     }
     case "challenge":
-      return NextResponse.redirect(new URL(decision.redirectTo, request.url));
+      return redirectTo(decision.redirectTo, request);
     case "refuse":
       return NextResponse.json({ error: "locked" }, { status: 401 });
     case "allow":

@@ -152,6 +152,11 @@ Set it and everything is gated:
   address bar, browser history and `Referer`, but it does pass through the
   server's access log once; the typed code does not.
 
+Redirects are built from `x-forwarded-host` when a proxy set it, so the gate
+works unchanged on every hostname the app is served on — the LAN route and any
+tunnel in front of it. Without that, a visitor arriving through a tunnel would
+be redirected to the internal hostname, which they cannot resolve.
+
 Two paths stay public by design, both in `src/lib/auth/decide.ts`:
 `/api/health`, because a liveness probe carries no cookie and a `401` would
 restart a healthy container, and `/api/elevenlabs/webhook`, because ElevenLabs

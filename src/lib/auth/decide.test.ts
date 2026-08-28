@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { decideAccess, safeNextPath } from "~/lib/auth/decide";
+import { decideAccess, safeNextPath, visitorOrigin } from "~/lib/auth/decide";
 import { mintAccessToken } from "~/lib/auth/gate";
 
 const passcode = "let-me-in-please";
@@ -88,5 +88,41 @@ describe("the post-unlock destination", () => {
     expect(safeNextPath("javascript:alert(1)")).toBe("/");
     expect(safeNextPath(null)).toBe("/");
     expect(safeNextPath(undefined)).toBe("/");
+  });
+});
+
+describe("the origin a redirect should point at", () => {
+  const origin = (
+    forwardedHost: string | null,
+    host: string | null,
+    forwardedProto: string | null = null,
+  ) => visitorOrigin({ forwardedHost, host, forwardedProto, fallbackProtocol: "http:" });
+
+  it("uses the host the visitor reached, when no proxy spoke", () => {
+    expect(origin(null, "callmode.192.168.1.105.sslip.io")).toBe(
+      "http://callmode.192.168.1.105.sslip.io",
+    );
+  });
+
+  it("prefers the forwarded host, so a tunnelled visitor is not sent to the LAN name", () => {
+    expect(origin("demo.trycloudflare.com", "internal.lan", "https")).toBe(
+      "https://demo.trycloudflare.com",
+    );
+  });
+
+  it("takes the first hop when a request crossed several proxies", () => {
+    expect(origin("demo.trycloudflare.com", "internal.lan", "https, http")).toBe(
+      "https://demo.trycloudflare.com",
+    );
+  });
+
+  it("falls back to the request's own protocol when none was forwarded", () => {
+    expect(origin("demo.trycloudflare.com", "internal.lan", null)).toBe(
+      "http://demo.trycloudflare.com",
+    );
+  });
+
+  it("gives up rather than guessing when there is no host at all", () => {
+    expect(origin(null, null)).toBeNull();
   });
 });

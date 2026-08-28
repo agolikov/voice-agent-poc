@@ -62,3 +62,27 @@ export const decideAccess = (input: {
  */
 export const safeNextPath = (value: string | null | undefined): string =>
   typeof value === "string" && value.startsWith("/") && !value.startsWith("//") ? value : "/";
+
+/**
+ * The origin the visitor actually typed, which is not always the one this
+ * server was reached on.
+ *
+ * A redirect has to be absolute — Next rejects a relative `Location` — and the
+ * app is served on more than one hostname: the LAN route through Traefik and
+ * whatever public tunnel fronts it. Building the URL from the request's own
+ * origin would bounce a public visitor to an internal hostname they cannot
+ * resolve, so a proxy's forwarded headers win when it set them.
+ */
+export const visitorOrigin = (input: {
+  forwardedHost: string | null;
+  host: string | null;
+  forwardedProto: string | null;
+  fallbackProtocol: string;
+}): string | null => {
+  const host = input.forwardedHost ?? input.host;
+  if (!host) return null;
+  // A request that crossed several proxies carries a list; the first entry is
+  // the one the visitor spoke.
+  const proto = input.forwardedProto?.split(",")[0]?.trim();
+  return `${proto || input.fallbackProtocol.replace(":", "")}://${host}`;
+};
