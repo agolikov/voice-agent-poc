@@ -125,6 +125,45 @@ Seeds one editable saved situation, one hand-written Spanish scene and one
 finished session, so the situation editor, `/practice/demo-pharmacy-es` and
 `/debrief/demo-session` are inspectable with nothing configured.
 
+## Site access
+
+`SITE_PASSCODE` puts one shared code in front of the whole site. This is
+deliberately not an account system: the demo is shown to people who should not
+have to sign up, and every visitor is the same anonymous user. What it buys is
+that a crawler, a scanner, or someone who guessed the hostname cannot reach the
+app — nor spend the ElevenLabs voice minutes and model tokens it holds
+credentials for.
+
+```sh
+# Hex rather than base64: the code also has to survive a `?key=` link, where
+# base64's `+` decodes back as a space.
+SITE_PASSCODE=$(openssl rand -hex 12)
+```
+
+Leave it unset and the site runs open, which is what local development wants.
+Set it and everything is gated:
+
+- A page request with no valid cookie redirects to `/unlock`, which asks for the
+  code and returns the visitor to where they were headed.
+- An API request with no valid cookie gets `401` — there is no HTML redirect for
+  `fetch` to follow.
+- `https://<host>/?key=<code>` unlocks in one click and redirects to strip the
+  parameter, so you can hand out a single link. It keeps the code out of the
+  address bar, browser history and `Referer`, but it does pass through the
+  server's access log once; the typed code does not.
+
+Two paths stay public by design, both in `src/lib/auth/decide.ts`:
+`/api/health`, because a liveness probe carries no cookie and a `401` would
+restart a healthy container, and `/api/elevenlabs/webhook`, because ElevenLabs
+carries no cookie either and already authenticates every delivery by HMAC.
+
+The cookie is HTTP-only and signed with the passcode itself, so **changing
+`SITE_PASSCODE` logs everyone out** rather than only stopping new arrivals. Its
+30-day expiry is inside the signed payload, so a value copied out of a browser
+still stops working. `/api/unlock` throttles guesses per client in memory,
+which is enough for one container and would need shared state behind more
+than one.
+
 ## How it fits together
 
 ```
@@ -132,6 +171,7 @@ src/lib/scenario/    templates, realization, reading photos, the generation prom
 src/lib/session/     settings, dynamic variables, similarity scoring
 src/lib/voice/       the practice session hook and its client tools
 src/lib/db/          drizzle schema and queries
+src/lib/auth/        the shared-passcode gate, driven by src/proxy.ts
 src/app/api/         token minting, scenarios, vision, sessions, the post-call webhook
 agent/               agent + client tool config, and the prompt they are built from
 ```

@@ -1,6 +1,14 @@
 import type { UiLocale } from "~/lib/i18n/locale";
 
 const en = {
+  unlockTitle: "This demo is private",
+  unlockBlurb: "Enter the access code you were given. There is no account to create — the code is all you need.",
+  unlockLabel: "Access code",
+  unlockAction: "Enter",
+  unlockChecking: "Checking…",
+  unlockWrong: "That code is not right.",
+  unlockThrottled: "Too many tries. Wait a few minutes, then try again.",
+  unlockFailed: "Could not check the code. Try again.",
   pastCalls: "Past calls",
   lightMode: "Light mode",
   darkMode: "Dark mode",
@@ -247,6 +255,7 @@ type MessageKey = keyof typeof en;
 type Translation = Partial<Record<MessageKey, string>>;
 
 const pl: Translation = {
+  unlockTitle: "To zamknięte demo", unlockBlurb: "Wpisz otrzymany kod dostępu. Nie trzeba zakładać konta — wystarczy kod.", unlockLabel: "Kod dostępu", unlockAction: "Wejdź", unlockChecking: "Sprawdzanie…", unlockWrong: "Ten kod jest nieprawidłowy.", unlockThrottled: "Zbyt wiele prób. Odczekaj kilka minut i spróbuj ponownie.", unlockFailed: "Nie udało się sprawdzić kodu. Spróbuj ponownie.",
   pastCalls: "Poprzednie rozmowy", lightMode: "Tryb jasny", darkMode: "Tryb ciemny", toggleTheme: "Przełącz motyw", interfaceLanguage: "Język interfejsu", setupSteps: "Etapy konfiguracji",
   stepIntro: "Jak to działa", stepLanguage: "Język", stepSituation: "Sytuacja", stepSettings: "Ustawienia",
   introTitle: "Ćwicz prawdziwą rozmowę na głos", introBlurb: "CallMode odgrywa drugą osobę: agent głosowy może być farmaceutą, rekruterem lub właścicielem mieszkania — i czeka, aż odpowiesz.",
@@ -260,6 +269,7 @@ const pl: Translation = {
 };
 
 const ru: Translation = {
+  unlockTitle: "Это закрытая демоверсия", unlockBlurb: "Введите выданный вам код доступа. Регистрация не нужна — достаточно кода.", unlockLabel: "Код доступа", unlockAction: "Войти", unlockChecking: "Проверяем…", unlockWrong: "Неверный код.", unlockThrottled: "Слишком много попыток. Подождите несколько минут и попробуйте снова.", unlockFailed: "Не удалось проверить код. Попробуйте ещё раз.",
   pastCalls: "Прошлые разговоры", lightMode: "Светлая тема", darkMode: "Тёмная тема", toggleTheme: "Переключить тему", interfaceLanguage: "Язык интерфейса", setupSteps: "Этапы настройки",
   stepIntro: "Как это работает", stepLanguage: "Язык", stepSituation: "Ситуация", stepSettings: "Настройки",
   introTitle: "Тренируйте реальные разговоры вслух", introBlurb: "CallMode играет роль собеседника: голосовой агент становится фармацевтом, работодателем или хозяином квартиры — и ждёт вашего ответа.", languageTitle: "Какой язык вы изучаете?", languageBlurb: "Это определяет язык сценки и сложность ваших реплик.", situationTitle: "Что вы хотите потренировать?", situationBlurb: "Выберите готовую ситуацию или опишите свою — приложение создаст сценку.", settingsTitle: "Сколько помощи вам нужно?", settingsBlurb: "Эти настройки действуют для одного разговора. В следующий раз та же ситуация может пройти иначе.",
