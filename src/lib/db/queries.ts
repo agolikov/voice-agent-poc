@@ -125,8 +125,9 @@ export type AttemptInput = {
 };
 
 /**
- * Score is stored as an integer percentage: SQLite has no decimal type worth
- * using here, and a float column would invite comparisons that read as exact.
+ * Score is stored as an integer percentage rather than a fraction: a float
+ * column would invite comparisons that read as exact, and nothing downstream
+ * needs more resolution than a whole percent.
  */
 export const recordAttempt = async (input: AttemptInput): Promise<void> => {
   const heard = input.heard ?? "";

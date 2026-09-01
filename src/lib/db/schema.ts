@@ -1,7 +1,7 @@
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 const timestamps = {
-  createdAt: integer({ mode: "timestamp" })
+  createdAt: timestamp({ withTimezone: true })
     .notNull()
     .$defaultFn(() => new Date()),
 };
@@ -11,7 +11,7 @@ const timestamps = {
  * so picking "At the pharmacy" in Spanish at B1 a second time replays the same
  * scene rather than paying for a new one.
  */
-export const scenario = sqliteTable(
+export const scenario = pgTable(
   "scenario",
   {
     id: text().primaryKey(),
@@ -22,7 +22,7 @@ export const scenario = sqliteTable(
     cefrLevel: text().notNull(),
     title: text().notNull(),
     /** The full validated Scenario, as JSON. */
-    payload: text({ mode: "json" }).notNull(),
+    payload: jsonb().notNull(),
     ...timestamps,
   },
   (table) => [
@@ -32,11 +32,11 @@ export const scenario = sqliteTable(
 );
 
 /** A user-authored template, kept so a generated situation can be replayed. */
-export const template = sqliteTable("template", {
+export const template = pgTable("template", {
   slug: text().primaryKey(),
   title: text().notNull(),
   /** The full validated ScenarioTemplate, as JSON. */
-  payload: text({ mode: "json" }).notNull(),
+  payload: jsonb().notNull(),
   ...timestamps,
 });
 
@@ -47,23 +47,23 @@ export const template = sqliteTable("template", {
  * ElevenLabs columns stay null until the post-call webhook lands — which may
  * never happen in local development. Nothing downstream may depend on them.
  */
-export const session = sqliteTable(
+export const session = pgTable(
   "session",
   {
     id: text().primaryKey(),
     scenarioId: text().notNull(),
     /** The SessionSettings this run used, as JSON. */
-    settings: text({ mode: "json" }).notNull(),
+    settings: jsonb().notNull(),
     conversationId: text(),
-    startedAt: integer({ mode: "timestamp" })
+    startedAt: timestamp({ withTimezone: true })
       .notNull()
       .$defaultFn(() => new Date()),
-    endedAt: integer({ mode: "timestamp" }),
+    endedAt: timestamp({ withTimezone: true }),
     outcome: text({ enum: ["goal-achieved", "partial", "abandoned", "out-of-time"] }),
     summary: text(),
     /** Post-call analysis from the webhook, as JSON. Null until it arrives. */
-    analysis: text({ mode: "json" }),
-    transcript: text({ mode: "json" }),
+    analysis: jsonb(),
+    transcript: jsonb(),
   },
   (table) => [
     index("session_scenario_id_idx").on(table.scenarioId),
@@ -76,7 +76,7 @@ export const session = sqliteTable(
  * debrief is built from: it arrives live over client tools, so the debrief works
  * with no webhook, no public URL and no network round trip.
  */
-export const attempt = sqliteTable(
+export const attempt = pgTable(
   "attempt",
   {
     id: text().primaryKey(),
@@ -103,7 +103,7 @@ export const attempt = sqliteTable(
  * them. Agent/model timing fields are nullable because ElevenLabs only reports
  * model-only timing after a completed turn has been processed.
  */
-export const message = sqliteTable(
+export const message = pgTable(
   "message",
   {
     id: text().primaryKey(),
@@ -111,7 +111,7 @@ export const message = sqliteTable(
     eventId: integer(),
     role: text({ enum: ["agent", "learner"] }).notNull(),
     body: text().notNull(),
-    recommendedTerms: text({ mode: "json" }).$type<string[]>().notNull().default([]),
+    recommendedTerms: jsonb().$type<string[]>().notNull().default([]),
     /** Learner transcript received → agent response received, in milliseconds. */
     agentResponseMs: integer(),
     /** ElevenLabs' completed-turn LLM TTFB, in milliseconds. */

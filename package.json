@@ -18,6 +18,7 @@
     "db:migrate": "node scripts/migrate.mjs",
     "db:studio": "drizzle-kit studio",
     "db:seed": "node scripts/seed-demo.mjs",
+    "db:import-sqlite": "node scripts/import-sqlite.mjs",
     "agent:pull": "elevenlabs agents pull",
     "agent:diff": "elevenlabs agents push --dry-run",
     "agent:push": "elevenlabs agents push"
@@ -27,10 +28,10 @@
     "@ai-sdk/openai-compatible": "^3.0.35",
     "@elevenlabs/elevenlabs-js": "^2.64.0",
     "@elevenlabs/react": "^1.13.0",
-    "@libsql/client": "^0.17.4",
     "ai": "^7.0.77",
     "drizzle-orm": "^0.45.2",
     "next": "^16.3.2",
+    "pg": "^8.23.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "zod": "^4.4.3"
@@ -39,6 +40,7 @@
     "@elevenlabs/cli": "^0.5.6",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^24.10.0",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "drizzle-kit": "^0.31.10",

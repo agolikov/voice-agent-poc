@@ -77,7 +77,7 @@ from the picture alone. `AI_VISION_MODEL` picks the model that does the reading.
 ```sh
 pnpm install
 cp .env.example .env.local        # then fill it in
-pnpm db:push                      # create the SQLite tables
+pnpm db:migrate                   # create the Postgres tables
 ```
 
 `AI_BASE_URL` takes any OpenAI-compatible endpoint; leave it empty to talk to

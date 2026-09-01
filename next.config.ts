@@ -4,7 +4,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["adding-accounting-validation-maybe.trycloudflare.com"],
-  serverExternalPackages: ["@libsql/client"],
+  serverExternalPackages: ["pg"],
   // Without this, Turbopack walks up to the home directory looking for a
   // lockfile and picks it as the project root.
   turbopack: { root: fileURLToPath(new URL(".", import.meta.url)) },

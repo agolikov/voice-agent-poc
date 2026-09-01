@@ -17,16 +17,15 @@ FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # `next build` imports every route module to collect page data, which
-# evaluates src/lib/db/client.ts and opens DATABASE_URL. The default is a file
-# under data/, which .dockerignore keeps out of the context. The throwaway
-# database this creates stays in this stage; the runtime stage makes its own.
-RUN mkdir -p data && pnpm build
+# evaluates src/lib/db/client.ts. That only constructs a connection pool —
+# node-postgres connects lazily — so no database has to be reachable here.
+RUN pnpm build
 
 FROM base AS runtime
 ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
-# The volume mount point. Overridable, but the image is useless without a
-# writable default.
-ENV DATABASE_URL=file:/app/data/practice.db
+# DATABASE_URL has no useful default any more: state lives in Postgres, so the
+# deployment must point this at a reachable cluster. The container applies the
+# migrations to it on every start.
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
@@ -34,7 +33,6 @@ COPY --from=build /app/src ./src
 COPY --from=build /app/drizzle ./drizzle
 COPY --from=build /app/scripts ./scripts
 COPY --from=build /app/package.json /app/next.config.ts ./
-RUN mkdir -p /app/data
 EXPOSE 3000
 # `next` directly rather than through pnpm: corepack would otherwise fetch
 # pnpm from the registry on every container start, making a restart depend on

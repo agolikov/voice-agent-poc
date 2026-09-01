@@ -8,9 +8,13 @@
  */
 import { randomUUID } from "node:crypto";
 
-import { createClient } from "@libsql/client";
+import pg from "pg";
 
-const db = createClient({ url: process.env.DATABASE_URL ?? "file:./data/practice.db" });
+const pool = new pg.Pool({
+  connectionString:
+    process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/callmode",
+  max: 1,
+});
 
 const scenarioId = "demo-pharmacy-es";
 const sessionId = "demo-session";
@@ -196,48 +200,75 @@ const messages = [
   ["learner", "Prefiero el jarabe. ¿Cuántas veces al día?", ["el jarabe", "cuántas veces al día"], null, null, null],
 ];
 
-const now = Math.floor(Date.now() / 1000);
+const now = Date.now();
+/** Seconds before `now`, as a timestamp column wants it. */
+const at = (secondsAgo) => new Date(now - secondsAgo * 1000);
 
-await db.batch(
-  [
-    { sql: "delete from message where session_id = ?", args: [sessionId] },
-    { sql: "delete from attempt where session_id = ?", args: [sessionId] },
-    { sql: "delete from session where id = ?", args: [sessionId] },
-    { sql: "delete from scenario where id = ?", args: [scenarioId] },
-    {
-      sql: `insert into template (slug, title, payload, created_at)
-            values (?, ?, ?, ?)
-            on conflict (slug) do update set title = excluded.title, payload = excluded.payload`,
-      args: [templateSlug, savedTemplate.title, JSON.stringify(savedTemplate), now],
-    },
-    {
-      sql: `insert into scenario (id, realization_key, template_slug, source, target_language, cefr_level, title, payload, created_at)
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [scenarioId, "demo", "pharmacy", "library", "es", "A2", scenario.title, JSON.stringify(scenario), now],
-    },
-    {
-      sql: `insert into session (id, scenario_id, settings, conversation_id, started_at, ended_at, outcome, summary)
-            values (?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [
+const client = await pool.connect();
+try {
+  await client.query("begin");
+
+  // Re-seeding replaces the demo rows rather than colliding with them.
+  await client.query("delete from message where session_id = $1", [sessionId]);
+  await client.query("delete from attempt where session_id = $1", [sessionId]);
+  await client.query("delete from session where id = $1", [sessionId]);
+  await client.query("delete from scenario where id = $1", [scenarioId]);
+
+  await client.query(
+    `insert into template (slug, title, payload, created_at)
+     values ($1, $2, $3, $4)
+     on conflict (slug) do update set title = excluded.title, payload = excluded.payload`,
+    [templateSlug, savedTemplate.title, savedTemplate, at(0)],
+  );
+
+  await client.query(
+    `insert into scenario (id, realization_key, template_slug, source, target_language, cefr_level, title, payload, created_at)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+    [scenarioId, "demo", "pharmacy", "library", "es", "A2", scenario.title, scenario, at(0)],
+  );
+
+  await client.query(
+    `insert into session (id, scenario_id, settings, conversation_id, started_at, ended_at, outcome, summary)
+     values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+    [
+      sessionId,
+      scenarioId,
+      settings,
+      null,
+      at(400),
+      at(0),
+      "goal-achieved",
+      "You got the syrup and the receipt. Watch the article before ticket.",
+    ],
+  );
+
+  for (const [index, row] of attempts.entries()) {
+    const [beatId, kind, heard, expected, verdict, correction, category, score] = row;
+    await client.query(
+      `insert into attempt (id, session_id, beat_id, kind, heard, expected, verdict, correction, category, score, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [
+        randomUUID(),
         sessionId,
-        scenarioId,
-        JSON.stringify(settings),
-        null,
-        now - 400,
-        now,
-        "goal-achieved",
-        "You got the syrup and the receipt. Watch the article before ticket.",
+        beatId,
+        kind,
+        heard,
+        expected,
+        verdict,
+        correction,
+        category,
+        score,
+        at(400 - index * 30),
       ],
-    },
-    ...attempts.map(([beatId, kind, heard, expected, verdict, correction, category, score], index) => ({
-      sql: `insert into attempt (id, session_id, beat_id, kind, heard, expected, verdict, correction, category, score, created_at)
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [randomUUID(), sessionId, beatId, kind, heard, expected, verdict, correction, category, score, now - 400 + index * 30],
-    })),
-    ...messages.map(([role, body, recommendedTerms, agentResponseMs, modelResponseMs, modelName], index) => ({
-      sql: `insert into message (id, session_id, event_id, role, body, recommended_terms, agent_response_ms, model_response_ms, model_name, created_at)
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [
+    );
+  }
+
+  for (const [index, row] of messages.entries()) {
+    const [role, body, recommendedTerms, agentResponseMs, modelResponseMs, modelName] = row;
+    await client.query(
+      `insert into message (id, session_id, event_id, role, body, recommended_terms, agent_response_ms, model_response_ms, model_name, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [
         randomUUID(),
         sessionId,
         index + 1,
@@ -247,12 +278,19 @@ await db.batch(
         agentResponseMs,
         modelResponseMs,
         modelName,
-        now - 390 + index * 12,
+        at(390 - index * 12),
       ],
-    })),
-  ],
-  "write",
-);
+    );
+  }
+
+  await client.query("commit");
+} catch (error) {
+  await client.query("rollback");
+  throw error;
+} finally {
+  client.release();
+  await pool.end();
+}
 
 console.log(`Seeded scenario ${scenarioId} and session ${sessionId}.`);
 console.log(`  saved editor:  / (Situation → ${savedTemplate.title} → Edit situation)`);
