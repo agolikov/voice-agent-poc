@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 
+import { DeleteConversation } from "~/components/history/delete-conversation";
 import { Card } from "~/components/ui";
 import { listRecentSessions } from "~/lib/db/queries";
 import { dateLocale } from "~/lib/i18n/locale";
@@ -68,6 +69,7 @@ const HistoryPage = async () => {
                     {t("audioUnavailable")}
                   </span>
                 )}
+                <DeleteConversation sessionId={session.id} />
               </div>
             </div>
             {session.summary ? <p className="mt-3 text-sm text-ink-soft">{session.summary}</p> : null}

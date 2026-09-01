@@ -6,7 +6,11 @@
  * first, then this. It is idempotent — every row is inserted with
  * `on conflict do nothing` — so a partial run can simply be repeated.
  *
- *   node scripts/import-sqlite.mjs [path/to/practice.db]
+ *   node scripts/import-sqlite.mjs path/to/practice.db
+ *
+ * The path is required: the file database has no home in this repository any
+ * more. The last committed copy can be recovered with
+ * `git show 6569ddd:data/practice.db > practice.db`.
  *
  * Reading uses node:sqlite so nothing has to be installed for a migration
  * that is only performed once.
@@ -15,7 +19,11 @@ import { DatabaseSync } from "node:sqlite";
 
 import pg from "pg";
 
-const source = process.argv[2] ?? "./data/practice.db";
+const source = process.argv[2];
+if (!source) {
+  console.error("Usage: node scripts/import-sqlite.mjs path/to/practice.db");
+  process.exit(1);
+}
 
 const sqlite = new DatabaseSync(source, { readOnly: true });
 const pool = new pg.Pool({

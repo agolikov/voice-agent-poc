@@ -280,6 +280,32 @@ export const listRecentSessions = async (limit = 20) =>
     .orderBy(desc(schema.session.startedAt))
     .limit(limit);
 
+/**
+ * Remove one run and everything logged against it.
+ *
+ * The scenario is deliberately left behind: it is a cached realization shared
+ * by every run of that situation, so dropping it here would throw away a scene
+ * other sessions still point at and make the next run pay for it again.
+ *
+ * Nothing declares a foreign key, so the children are deleted explicitly and in
+ * one transaction — a partial delete would leave attempts and messages pointing
+ * at a session that no longer exists, and the debrief reads them by session id.
+ */
+export const deleteSession = async (sessionId: string): Promise<boolean> =>
+  db.transaction(async (tx) => {
+    const [row] = await tx
+      .select({ id: schema.session.id })
+      .from(schema.session)
+      .where(eq(schema.session.id, sessionId))
+      .limit(1);
+    if (!row) return false;
+
+    await tx.delete(schema.message).where(eq(schema.message.sessionId, sessionId));
+    await tx.delete(schema.attempt).where(eq(schema.attempt.sessionId, sessionId));
+    await tx.delete(schema.session).where(eq(schema.session.id, sessionId));
+    return true;
+  });
+
 export const getSessionRecord = async (sessionId: string) => {
   const [row] = await db
     .select()
