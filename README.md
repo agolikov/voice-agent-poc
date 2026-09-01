@@ -9,11 +9,17 @@ waiting. When you are stuck, you ask for help: it gives you one line in the targ
 language, **you say it back**, and the scene carries on. At the end you get a
 debrief of the lines you were given, the ones you missed, and what to fix.
 
-[**Watch the 26-second walkthrough**](callmode-walkthrough.mp4) — English
-interface, learning Polish, one situation from the library, straight through to
-the brief. Silent, and it stops where the microphone would take over.
+## Watch it
 
-![The situation library](callmode-home.png)
+26 seconds — English interface, learning Polish, one situation from the library,
+straight through to the brief. Silent, and it stops where the microphone would
+take over.
+
+<video src="https://github.com/agolikov/voice-agent-poc/raw/main/docs/media/callmode-walkthrough.mp4" poster="https://github.com/agolikov/voice-agent-poc/raw/main/docs/media/callmode-home.png" controls muted playsinline width="100%"></video>
+
+_No player? [Download the walkthrough](docs/media/callmode-walkthrough.mp4)._
+
+![The four-step intro screen: pick a situation, have it out loud, ask for help then say it, get the debrief](docs/media/callmode-home.png)
 
 ## The help loop
 
@@ -25,13 +31,15 @@ This is what makes it different from talking to a chatbot.
 4. It grades your repetition, and after two misses corrects you, logs it and
    moves on — the scene never deadlocks on a misheard word.
 
+![A pharmacy scene set up in Polish: the roles, the goal, the six beats, and the words for the scene](docs/media/practice-pl.png)
+
 The whole script is also available before the call, collapsed, behind one
 confirmation. It is a spoiler in the strict sense — reading the line replaces
 producing it with recognising it — so it asks whether you are sure, and it is
 not offered once the call is live. It exists because a learner too nervous to
 press the button does not practise at all.
 
-![A scene in progress](practice-pl.png)
+![The confirmation asking whether you are sure you want to see the whole script, with Keep it hidden and Show it anyway](docs/media/warn.png)
 
 ## What you can practise
 

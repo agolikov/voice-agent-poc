@@ -11,3 +11,4 @@ next-env.d.ts
 coverage
 .playwright-mcp
 *.png
+!docs/media/*.png
