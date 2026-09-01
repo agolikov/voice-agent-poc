@@ -9,6 +9,12 @@ waiting. When you are stuck, you ask for help: it gives you one line in the targ
 language, **you say it back**, and the scene carries on. At the end you get a
 debrief of the lines you were given, the ones you missed, and what to fix.
 
+## Watch it
+
+[**A 26-second walkthrough**](callmode-walkthrough.mp4) — English interface,
+learning Polish, one situation from the library, straight through to the brief.
+Silent, and it stops where the microphone would take over.
+
 ## The help loop
 
 This is the part worth understanding, because it is what makes the app different
@@ -71,6 +77,45 @@ situation next month does not depend on the photo still existing.
 
 A photo is a brief on its own: leave the description empty and the scene is built
 from the picture alone. `AI_VISION_MODEL` picks the model that does the reading.
+
+## Tech
+
+Two jobs, and they are not solved by the same thing.
+
+**The conversation is an ElevenLabs voice agent.** Recognition, the turn-taking
+model and speech synthesis sit behind one realtime session the browser joins
+over WebRTC — not a pipeline of STT, then an LLM, then TTS, each waiting on the
+one before it. What the app is selling is the feeling that someone is waiting
+for you to speak, and that feeling is made of latency.
+
+The agent also drives the screen, through six client tools the browser
+implements: `showHint`, `recordAttempt`, `advanceBeat`, `logMistake`,
+`changeSituation` and `endScenario`. The help loop is those calls arriving in
+order, and the debrief is assembled from them as they land.
+
+**The scenes are written by an open-weight model.** That is bounded, structured
+work — fill a schema with a setting, two roles, a goal, and the beats, each with
+its model answer and key phrases. It is asked for with `generateObject` against
+the same Zod schema the app validates against anyway, so the model fills a shape
+rather than returning prose someone has to dig an object out of. It does not
+need a frontier model, and the demo runs `Qwen/Qwen3-32B` on an
+OpenAI-compatible endpoint. Photographs go to a separate vision model: reading a
+menu and writing a scene are different jobs, and whatever is best at one is
+rarely the cheapest at the other.
+
+That half is deliberately portable. `AI_BASE_URL` and `AI_MODEL` take any
+OpenAI-compatible endpoint, leaving `AI_BASE_URL` empty talks to Anthropic
+directly, and `DATABASE_URL` takes any Postgres. The voice layer is the one part
+that is not swappable.
+
+| Layer | What the demo uses |
+| --- | --- |
+| App | Next.js 16 (App Router), React 19, Tailwind 4 |
+| Voice | ElevenLabs Agents over WebRTC — `scribe_realtime` ASR, `eleven_flash_v2_5` TTS, `gemini-2.5-flash` behind the agent |
+| Scene writing | Nebius Token Factory, `Qwen/Qwen3-32B`; `Qwen/Qwen2.5-VL-72B-Instruct` reads photos |
+| Storage | Postgres, through Drizzle and `node-postgres` — Neon for the demo |
+| Hosting | Vercel for the demo; the `Dockerfile` is the self-host path |
+| Access | one shared passcode, no accounts |
 
 ## Setup
 
@@ -197,6 +242,11 @@ the moment the call ends. The post-call webhook adds ElevenLabs' own analysis wh
 it arrives — which in local development, with no public URL, it never does. Nothing
 depends on it.
 
+Past runs are listed at `/history`, newest first, each row linking to its
+debrief with the transcript and — when ElevenLabs kept a recording — the audio.
+A row can be deleted from there, which takes its attempts and its transcript
+with it and leaves the realized scene alone, since other runs still point at it.
+
 To receive it anyway:
 
 ```sh
@@ -231,3 +281,31 @@ the limit so it can steer to a close rather than being cut off mid-sentence.
 Pronunciation is not scored. ElevenLabs' ASR returns text, not phonemes, so the
 repeat gate judges phrasing and word choice and is blind to accent. Azure's
 Pronunciation Assessment is the upgrade path if that turns out to matter.
+
+## Future improvements
+
+The scene you get is shaped by the situation and your level, and by nothing
+else. The three below are one idea from three sides: the app should know what
+you personally cannot say yet, and spend the voice minutes there.
+
+**Say what a scene has to exercise.** You pick a situation and a level, and what
+comes back is whatever the model thought fitted. There is no way to say that
+this run must make you produce the past conditional, or these twelve words, or
+the formal register throughout. A scene is realized from a template plus
+settings, so this is a third input to that realization: a required inventory the
+writer has to build beats around, and the repeat gate has to score against.
+
+**Read the sessions already stored.** Every judged turn is logged with what was
+expected, what was heard, a verdict and a similarity score, and every mistake
+the agent corrects is filed under `grammar`, `vocabulary`, `word-order`,
+`register` or `pronunciation`. Nothing reads any of it across sessions — the
+debrief looks at one call and forgets it. That history is the raw material for
+everything here, and it is being written today.
+
+**Practise the gaps, not the topic.** Picking a situation is picking a topic,
+and the vocabulary you get is whatever that topic happens to carry: the words
+you already have come round again, and the ones you keep missing turn up only by
+accident. Aggregated across sessions, the attempt log says which structures fail
+and which words never survive a repeat. The app should be able to write the
+scene that puts exactly those in your mouth, and to bring them back until the
+scores say they have stuck.

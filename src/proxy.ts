@@ -50,8 +50,10 @@ export const proxy = (request: NextRequest): NextResponse => {
 export const config = {
   // Without a matcher the gate would also run on every stylesheet, script and
   // image, so a locked-out visitor would be redirected instead of being served
-  // the assets the gate page itself needs.
+  // the assets the gate page itself needs. `_vercel` is where Vercel Web
+  // Analytics fetches its script and posts its page views: gating those would
+  // silently drop the traffic of anyone still looking at the unlock page.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf)$).*)",
+    "/((?!_next/static|_next/image|_vercel|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf)$).*)",
   ],
 };

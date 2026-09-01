@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 
 import "~/app/globals.css";
@@ -25,6 +26,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
         <GlobalControls />
         {children}
       </I18nProvider>
+      <Analytics />
     </body>
   </html>
 };
