@@ -6,6 +6,7 @@ build
 .env.local
 .env*.local
 data/*.db
+!data/practice.db
 data/*.db-journal
 data/*.db-wal
 data/*.db-shm
