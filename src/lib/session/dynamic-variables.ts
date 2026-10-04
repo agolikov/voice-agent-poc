@@ -102,6 +102,25 @@ export const languagePolicyInstruction = (settings: SessionSettings): string => 
 };
 
 /**
+ * The settings a run actually uses: the learner's preferences, with the
+ * language and level the scene was written in taking precedence.
+ *
+ * Settings come from the browser at call time, and the stored ones may have
+ * moved on since the scene was realized — running an old scene from the
+ * debrief after switching language would otherwise tell the agent to speak one
+ * language while every line it hands over is in another.
+ */
+export const settingsForScenario = (
+  scenario: Scenario,
+  settings: SessionSettings,
+): SessionSettings => ({
+  ...settings,
+  targetLanguage: scenario.targetLanguage,
+  nativeLanguage: scenario.nativeLanguage ?? settings.nativeLanguage,
+  cefrLevel: scenario.cefrLevel,
+});
+
+/**
  * Everything the agent needs for one run. The prompt in
  * `agent/agent_configs/roleplay-tutor.json` reads these by name, so a change
  * here without a matching change there leaves an unresolved `{{placeholder}}`

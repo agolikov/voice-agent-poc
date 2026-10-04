@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { saveTemplate } from "~/lib/db/queries";
+import { saveNewTemplate } from "~/lib/db/queries";
 import { uiLocales } from "~/lib/i18n/locale";
 import { generateTemplate } from "~/lib/scenario/generate";
 import { sessionSettingsSchema } from "~/lib/session/settings";
@@ -32,8 +32,8 @@ export const POST = async (request: Request): Promise<NextResponse> => {
   }
 
   try {
-    const template = await generateTemplate(body.data);
-    await saveTemplate(template);
+    // The slug may differ from the one generated: a title already taken gets a suffix.
+    const template = await saveNewTemplate(await generateTemplate(body.data));
     return NextResponse.json({ template });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

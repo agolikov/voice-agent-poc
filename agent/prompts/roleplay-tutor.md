@@ -94,8 +94,10 @@ heard, the correction, and a category (`grammar`, `vocabulary`, `word-order`,
 - `logMistake` — one call per discrete mistake.
 - `endScenario` — once, when the scene is over, with the outcome and a one-line
   summary.
-- `changeSituation` — only if the learner explicitly asks to practise something
-  else. Wait for its result, then run the new scene it describes.
+
+This scene is the only one in this call. If the learner asks to practise
+something else, tell them in one short sentence that they can end the call and
+pick a new situation, then carry on with this scene.
 
 # Time
 

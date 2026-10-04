@@ -50,6 +50,11 @@ export const scenarioSchema = z.object({
   source: scenarioSourceSchema,
   /** BCP-47, e.g. "pl", "es-ES". The language the learner is practising. */
   targetLanguage: z.string().min(2),
+  /**
+   * The language the translations were written in. Optional because scenes
+   * realized before it was recorded do not carry it.
+   */
+  nativeLanguage: z.string().min(2).optional(),
   cefrLevel: cefrLevelSchema,
   /** One sentence of place and time: "A pharmacy in Krakow, late evening". */
   setting: z.string().min(1),

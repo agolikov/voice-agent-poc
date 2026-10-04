@@ -10,6 +10,7 @@ import {
   scenarioRecommendedTerms,
 } from "~/lib/session/recommended-terms";
 import type { SessionSettings } from "~/lib/session/settings";
+import { attemptKind, type Verdict } from "~/lib/voice/attempts";
 import type {
   ActiveHint,
   LoggedMistake,
@@ -59,11 +60,18 @@ export const usePracticeSession = (scenario: Scenario, settings: SessionSettings
   // change: the SDK keeps the latest closure, but the id is needed synchronously.
   const sessionIdRef = useRef<string | null>(null);
   const beatIndexRef = useRef(0);
+  const hintRef = useRef<ActiveHint | null>(null);
   const lastLearnerAtRef = useRef<number | null>(null);
   const turnSubmittingRef = useRef(false);
   const turnSafetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputControlsRef = useRef<{ setMuted: (muted: boolean) => void } | null>(null);
   const recommendations = scenarioRecommendedTerms(scenario);
+
+  /** The ref leads, so the next tool call sees the hint before React re-renders. */
+  const updateHint = (next: (current: ActiveHint | null) => ActiveHint | null) => {
+    hintRef.current = next(hintRef.current);
+    setHint(hintRef.current);
+  };
 
   const conversation = useConversation({
     onConnect: () => setStatus("live"),
@@ -111,7 +119,7 @@ export const usePracticeSession = (scenario: Scenario, settings: SessionSettings
       translation: string;
       beatId: string;
     };
-    setHint({ beatId, text, translation, outcome: "awaiting" });
+    updateHint(() => ({ beatId, text, translation, outcome: "awaiting" }));
     setHintCount((count) => count + 1);
     if (sessionIdRef.current) {
       postJson(`/api/sessions/${sessionIdRef.current}/attempts`, {
@@ -131,7 +139,7 @@ export const usePracticeSession = (scenario: Scenario, settings: SessionSettings
     // Clear a hint only once the scene has left the beat it belonged to. An
     // awaiting hint is the line the learner is about to say, so taking it off
     // screen because the agent advanced early is the worst possible moment.
-    setHint((current) => {
+    updateHint((current) => {
       if (!current) return null;
       return current.beatId === scenario.beats[clamped]?.id ? current : null;
     });
@@ -143,19 +151,18 @@ export const usePracticeSession = (scenario: Scenario, settings: SessionSettings
       beatId: string;
       heard: string;
       expected: string;
-      verdict: "answered" | "repeated" | "partial" | "missed";
+      verdict: Verdict;
       correction: string;
     };
-    setHint((current) =>
+    // Read before the outcome below settles the hint it may belong to.
+    const kind = attemptKind(attempt.verdict, attempt.beatId, hintRef.current);
+    updateHint((current) =>
       current && current.beatId === attempt.beatId && attempt.verdict !== "answered"
         ? { ...current, outcome: attempt.verdict }
         : current,
     );
     if (sessionIdRef.current) {
-      postJson(`/api/sessions/${sessionIdRef.current}/attempts`, {
-        ...attempt,
-        kind: attempt.verdict === "repeated" || attempt.verdict === "missed" ? "repeat" : "answer",
-      });
+      postJson(`/api/sessions/${sessionIdRef.current}/attempts`, { ...attempt, kind });
     }
     return "logged";
   });

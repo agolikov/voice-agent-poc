@@ -13,6 +13,7 @@ import {
   hintInstruction,
   languagePolicyInstruction,
   renderBeats,
+  settingsForScenario,
 } from "~/lib/session/dynamic-variables";
 import { defaultSessionSettings, type SessionSettings } from "~/lib/session/settings";
 
@@ -163,6 +164,33 @@ describe("overrides", () => {
       withSettings({ voiceId: "chosen-voice" }),
     );
     expect(overrides.tts.voiceId).toBe("chosen-voice");
+  });
+});
+
+describe("settings for a scene written earlier", () => {
+  // The learner has since switched to Polish at A2; the scene is still Spanish at B1.
+  const moved = withSettings({ targetLanguage: "pl", nativeLanguage: "de", cefrLevel: "A2" });
+
+  it("speaks the language the scene's lines are written in", () => {
+    const settings = settingsForScenario(scenario, moved);
+    expect(buildOverrides(scenario, settings).agent.language).toBe("es");
+    expect(buildDynamicVariables(scenario, settings).target_language).toBe("Spanish");
+    expect(buildDynamicVariables(scenario, settings).cefr_level).toBe("B1");
+  });
+
+  it("cues in the language the translations were written in, when the scene records it", () => {
+    const settings = settingsForScenario({ ...scenario, nativeLanguage: "en" }, moved);
+    expect(hintInstruction({ ...settings, hintMode: "native-cue-first" })).toContain("in English");
+  });
+
+  it("keeps the learner's native language for a scene that never recorded one", () => {
+    expect(settingsForScenario(scenario, moved).nativeLanguage).toBe("de");
+  });
+
+  it("leaves every other preference alone", () => {
+    const settings = settingsForScenario(scenario, { ...moved, hintMode: "native-cue-first" });
+    expect(settings.hintMode).toBe("native-cue-first");
+    expect(settings.maxDurationMinutes).toBe(moved.maxDurationMinutes);
   });
 });
 

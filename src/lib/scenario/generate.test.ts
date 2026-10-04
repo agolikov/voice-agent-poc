@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { mergeRealization, realizationKey } from "~/lib/scenario/generate";
+import { mergeRealization, realizationKey, slugCandidates } from "~/lib/scenario/generate";
 import { loadTemplates } from "~/lib/scenario/library";
-import { realizationSchema, scenarioSchema, type Realization } from "~/lib/scenario/schema";
+import {
+  realizationSchema,
+  scenarioSchema,
+  scenarioTemplateSchema,
+  type Realization,
+} from "~/lib/scenario/schema";
 import { defaultSessionSettings } from "~/lib/session/settings";
 
 const template = loadTemplates().find((candidate) => candidate.slug === "pharmacy")!;
@@ -33,6 +38,14 @@ describe("merging a realization onto its template", () => {
     );
     expect(scenarioSchema.safeParse(scenario).success).toBe(true);
     expect(scenario.beats).toHaveLength(template.beats.length);
+  });
+
+  it("records the languages and level it was written for", () => {
+    const settings = { ...defaultSessionSettings, targetLanguage: "pl", nativeLanguage: "uk" };
+    const scenario = mergeRealization(template, realizationFor(allIds), settings, "scenario-1");
+    expect(scenario.targetLanguage).toBe("pl");
+    expect(scenario.nativeLanguage).toBe("uk");
+    expect(scenario.cefrLevel).toBe(settings.cefrLevel);
   });
 
   it("keeps the template's structure rather than the model's", () => {
@@ -139,5 +152,26 @@ describe("the realization cache key", () => {
     const base = realizationKey(template, defaultSessionSettings);
     expect(realizationKey(template, { ...defaultSessionSettings, hintMode: "native-cue-first" })).toBe(base);
     expect(realizationKey(template, { ...defaultSessionSettings, repeatPolicy: "hard-gate" })).toBe(base);
+  });
+});
+
+describe("slugs for a generated situation", () => {
+  it("tries the title's own slug first, then numbered ones", () => {
+    expect(slugCandidates("late-parcel").slice(0, 3)).toEqual([
+      "late-parcel",
+      "late-parcel-2",
+      "late-parcel-3",
+    ]);
+  });
+
+  it("never offers the same slug twice", () => {
+    const candidates = slugCandidates("late-parcel");
+    expect(new Set(candidates).size).toBe(candidates.length);
+  });
+
+  it("offers only slugs a template may carry", () => {
+    for (const slug of slugCandidates("late-parcel")) {
+      expect(scenarioTemplateSchema.shape.slug.safeParse(slug).success, slug).toBe(true);
+    }
   });
 });

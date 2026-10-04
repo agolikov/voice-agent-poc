@@ -8,12 +8,6 @@
         },
         {
             "type": "client",
-            "config": "agent/tool_configs/changeSituation.json",
-            "name": "changeSituation",
-            "id": "tool_0701m0ytxn1pfyzajhxsgj63fd2s"
-        },
-        {
-            "type": "client",
             "config": "agent/tool_configs/endScenario.json",
             "name": "endScenario",
             "id": "tool_2601m0ytxn76fb3vtfr2qh08v421"

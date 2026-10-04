@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { createSession, getScenario } from "~/lib/db/queries";
-import { buildDynamicVariables, buildOverrides } from "~/lib/session/dynamic-variables";
+import {
+  buildDynamicVariables,
+  buildOverrides,
+  settingsForScenario,
+} from "~/lib/session/dynamic-variables";
 import { sessionSettingsSchema } from "~/lib/session/settings";
 
 const bodySchema = z.object({
@@ -22,11 +26,13 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     return NextResponse.json({ error: z.prettifyError(body.error) }, { status: 400 });
   }
 
-  const { scenarioId, settings } = body.data;
-  const scenario = await getScenario(scenarioId);
+  const scenario = await getScenario(body.data.scenarioId);
   if (!scenario) {
     return NextResponse.json({ error: "That scene no longer exists." }, { status: 404 });
   }
+
+  // Stored on the session too, so the row records what the agent was told.
+  const settings = settingsForScenario(scenario, body.data.settings);
 
   return NextResponse.json({
     sessionId: await createSession(scenario.id, settings),

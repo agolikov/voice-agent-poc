@@ -3,7 +3,8 @@ import { randomUUID } from "node:crypto";
 import { and, asc, desc, eq } from "drizzle-orm";
 
 import { db, schema } from "~/lib/db/client";
-import { realizationKey } from "~/lib/scenario/generate";
+import { realizationKey, slugCandidates } from "~/lib/scenario/generate";
+import { loadTemplates } from "~/lib/scenario/library";
 import {
   scenarioSchema,
   scenarioTemplateSchema,
@@ -63,6 +64,33 @@ export const getScenario = async (id: string): Promise<Scenario | null> => {
   return parsed.success ? parsed.data : null;
 };
 
+/**
+ * Save a freshly generated situation under a slug nothing else holds.
+ *
+ * The slug comes from the model's title, so two situations can easily share
+ * one — and an upsert would quietly replace the first with the second, while a
+ * curated slug would shadow the new one in `/prepare`. Each candidate is
+ * claimed with an insert that does nothing on conflict, so two generations
+ * racing for the same title cannot overwrite each other either.
+ */
+export const saveNewTemplate = async (value: ScenarioTemplate): Promise<ScenarioTemplate> => {
+  const curated = new Set(loadTemplates().map((template) => template.slug));
+
+  for (const slug of slugCandidates(value.slug)) {
+    if (curated.has(slug)) continue;
+    const template = { ...value, slug };
+    const claimed = await db
+      .insert(schema.template)
+      .values({ slug, title: template.title, payload: template })
+      .onConflictDoNothing()
+      .returning({ slug: schema.template.slug });
+    if (claimed.length > 0) return template;
+  }
+
+  throw new Error(`Could not find a free slug for "${value.title}".`);
+};
+
+/** Update a saved situation in place, keeping its slug. */
 export const saveTemplate = async (value: ScenarioTemplate): Promise<void> => {
   await db
     .insert(schema.template)

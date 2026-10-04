@@ -41,7 +41,7 @@ from it.
 
 ```sh
 npx @elevenlabs/cli auth login
-npx @elevenlabs/cli tools push             # the six client tools
+npx @elevenlabs/cli tools push             # the five client tools
 node agent/build.mjs                       # prompt.md + tool ids -> agent config
 npx @elevenlabs/cli agents push --dry-run  # check the diff first
 npx @elevenlabs/cli agents push
@@ -84,9 +84,8 @@ not a pipeline of STT, then an LLM, then TTS, each waiting on the one before it.
 What the app is selling is the feeling that someone is waiting for you to speak,
 and that feeling is made of latency.
 
-The agent drives the screen through six client tools the browser implements:
-`showHint`, `recordAttempt`, `advanceBeat`, `logMistake`, `changeSituation` and
-`endScenario`. The help loop is those calls arriving in order, and the debrief is
+The agent drives the screen through five client tools the browser implements:
+`showHint`, `recordAttempt`, `advanceBeat`, `logMistake` and `endScenario`. The help loop is those calls arriving in order, and the debrief is
 assembled from them as they land.
 
 **The scenes are written by an open-weight model.** Bounded, structured work: fill

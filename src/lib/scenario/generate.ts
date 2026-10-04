@@ -49,6 +49,17 @@ const slugify = (text: string): string =>
     .slice(0, 60) || "situation";
 
 /**
+ * The slugs to try, in order, for a situation whose title may already be
+ * taken: `late-parcel`, `late-parcel-2`, `late-parcel-3`… and, should every one
+ * of those be gone, one that no title can collide with.
+ */
+export const slugCandidates = (base: string, numbered = 20): string[] => [
+  base,
+  ...Array.from({ length: numbered - 1 }, (_, index) => `${base}-${index + 2}`),
+  `${base}-${randomUUID().slice(0, 8)}`,
+];
+
+/**
  * Design a template from the learner's own description of a situation, from a
  * photo they took, or from both.
  *
@@ -118,6 +129,7 @@ export const mergeRealization = (
     title: template.title,
     source: template.source,
     targetLanguage: settings.targetLanguage,
+    nativeLanguage: settings.nativeLanguage,
     cefrLevel: settings.cefrLevel,
     setting: realization.setting,
     agentRole: { ...template.agentRole, name: realization.agentName },
